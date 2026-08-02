@@ -21,35 +21,128 @@
 (defun env (name &optional default)
   (or (uiop:getenv name) default))
 
-;;; Packager 0.8.0 normalize-dep chokes on (:feature (:and …) "sys").
-;;; Patch until a newer packager ships the fix.
+;;; Packager 0.8.0 workarounds (until newer packager OCI tag):
+;;; - normalize-dep crashes on (:feature (:and …) dep)
+;;; - discover-provided-systems uses *read-eval* nil → #. in .asd yields no systems
+;;; - resolve-system-name errors even when PKG_SYSTEM is explicit
+
+(defun feature-expr-p (expr)
+  (cond
+    ((null expr) t)
+    ((eq expr t) t)
+    ((symbolp expr) (and (member expr *features* :test #'eq) t))
+    ((and (consp expr) (eq (first expr) :and))
+     (every #'feature-expr-p (rest expr)))
+    ((and (consp expr) (eq (first expr) :or))
+     (some #'feature-expr-p (rest expr)))
+    ((and (consp expr) (eq (first expr) :not) (rest expr))
+     (not (feature-expr-p (second expr))))
+    (t nil)))
+
 (defun normalize-dep* (dep)
   (cond
+    ((null dep) nil)
     ((stringp dep) (string-downcase dep))
-    ((symbolp dep) (string-downcase (symbol-name dep)))
+    ((and (symbolp dep) (not (null dep)))
+     (string-downcase (symbol-name dep)))
     ((and (consp dep) (eq (first dep) :version) (>= (length dep) 3))
-     (cons (normalize-dep* (second dep)) (string (third dep))))
+     (let ((name (normalize-dep* (second dep))))
+       (when name (cons name (string (third dep))))))
     ((and (consp dep) (eq (first dep) :feature) (>= (length dep) 3))
-     (when (uiop:featurep (second dep))
+     (when (feature-expr-p (second dep))
        (normalize-dep* (third dep))))
-    ((and (consp dep) (eq (first dep) :require))
+    ((and (consp dep) (member (first dep) '(:require :feature) :test #'eq))
      nil)
     ((consp dep)
      (normalize-dep* (or (find-if #'stringp dep)
-                         (find-if #'symbolp dep)
+                         (find-if (lambda (x) (and (symbolp x) x (not (keywordp x)))) dep)
+                         (third dep)
                          (second dep))))
     (t nil)))
 
 (setf (fdefinition 'cl-repository-packager/asdf-plugin:normalize-dep)
       #'normalize-dep*)
 
+(defun discover-provided-systems* (source-dir)
+  "Like packager discover, but allow #. in .asd (split-sequence etc.)."
+  (let ((names nil)
+        (*read-eval* t)
+        (*package* (find-package :cl-user)))
+    (dolist (asd-path (directory (merge-pathnames "*.asd"
+                                                  (uiop:ensure-directory-pathname source-dir))))
+      (handler-case
+          (with-open-file (s asd-path :direction :input :if-does-not-exist nil)
+            (when s
+              (loop for form = (read s nil :eof)
+                    until (eq form :eof)
+                    when (and (listp form)
+                              (symbolp (first form))
+                              (string-equal "DEFSYSTEM" (symbol-name (first form)))
+                              (second form))
+                      do (let ((name (etypecase (second form)
+                                       (string (second form))
+                                       (symbol (string-downcase (symbol-name (second form)))))))
+                           (pushnew name names :test #'string=)))))
+        (error () nil)))
+    (nreverse names)))
+
+(setf (fdefinition 'cl-repository-packager/asdf-plugin:discover-provided-systems)
+      #'discover-provided-systems*)
+
+(defun resolve-system-name* (source-dir explicit-system-name)
+  (let ((systems (discover-provided-systems* source-dir)))
+    (cond
+      (explicit-system-name
+       (unless (or (null systems)
+                   (member explicit-system-name systems :test #'string=))
+         (error "Requested system ~a not found. Available systems: ~{~a~^, ~}"
+                explicit-system-name systems))
+       explicit-system-name)
+      ((null systems)
+       (error "No .asd systems found in source directory: ~a" source-dir))
+      ((= (length systems) 1)
+       (first systems))
+      (t
+       (error "Multiple systems found (~{~a~^, ~}). Please pass --system." systems)))))
+
+(setf (fdefinition 'cl-repository-packager/source-adapter::resolve-system-name)
+      #'resolve-system-name*)
+
+(defun manual-package-spec (system-name source-dir)
+  "Fallback when auto-package-spec still fails (complex .asd metadata)."
+  (let* ((system (asdf:find-system system-name nil))
+         (deps (when system
+                 (remove nil (mapcar #'normalize-dep*
+                                     (asdf:system-depends-on system)))))
+         (provides (or (discover-provided-systems* source-dir)
+                       (list system-name))))
+    (make-instance 'cl-repository-packager/build-matrix:package-spec
+      :name system-name
+      :version (or (and system (asdf:component-version system)) "latest")
+      :source-dir (uiop:ensure-directory-pathname source-dir)
+      :license (ignore-errors (asdf:system-licence system))
+      :description (ignore-errors (asdf:system-description system))
+      :author (let ((a (ignore-errors (asdf:system-author system))))
+                (typecase a
+                  (string a)
+                  (cons (format nil "~{~a~^, ~}" a))
+                  (t nil)))
+      :depends-on deps
+      :provides provides)))
+
 (let ((orig (fdefinition 'cl-repository-packager/asdf-plugin:auto-package-spec)))
   (setf (fdefinition 'cl-repository-packager/asdf-plugin:auto-package-spec)
         (lambda (system-name)
-          (let ((spec (funcall orig system-name)))
-            (setf (cl-repository-packager/build-matrix:package-spec-depends-on spec)
-                  (remove nil (cl-repository-packager/build-matrix:package-spec-depends-on spec)))
-            spec))))
+          (handler-case
+              (let ((spec (funcall orig system-name)))
+                (setf (cl-repository-packager/build-matrix:package-spec-depends-on spec)
+                      (remove nil (cl-repository-packager/build-matrix:package-spec-depends-on spec)))
+                spec)
+            (error (e)
+              (format t "~&auto-package-spec failed (~a); using manual fallback~%" e)
+              (manual-package-spec
+               system-name
+               (asdf:system-source-directory (asdf:find-system system-name))))))))
 
 (defun strip-comment (line)
   (let ((pos (position #\# line)))
