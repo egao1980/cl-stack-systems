@@ -184,19 +184,26 @@
 
 (defun oci-safe-name (name)
   "GHCR paths cannot contain '+'; map cl+ssl → cl-plus-ssl."
-  (substitute #\- #\+ name))
+  (with-output-to-string (out)
+    (loop for c across name
+          do (if (char= c #\+)
+                 (write-string "-plus-" out)
+                 (write-char c out)))))
+
+(defvar *oci-package-name* nil
+  "Preferred OCI package name (import directory), overriding ASDF system name.")
 
 (defun ensure-oci-safe-spec (spec)
-  "Rewrite package name for OCI; keep original name in provides."
+  "Use import-dir / sanitized name for OCI; drop '+' from provide aliases."
   (let* ((orig (cl-repository-packager/build-matrix:package-spec-name spec))
-         (safe (oci-safe-name orig)))
-    (unless (string= orig safe)
-      (setf (cl-repository-packager/build-matrix:package-spec-name spec) safe)
-      (setf (cl-repository-packager/build-matrix:package-spec-provides spec)
-            (remove-duplicates
-             (append (list orig safe)
-                     (cl-repository-packager/build-matrix:package-spec-provides spec))
-             :test #'string=)))
+         (safe (or *oci-package-name* (oci-safe-name orig)))
+         (provides (cl-repository-packager/build-matrix:package-spec-provides spec)))
+    (setf (cl-repository-packager/build-matrix:package-spec-name spec) safe)
+    ;; Alias pushes also hit GHCR paths — never leave '+' in provide names.
+    (setf (cl-repository-packager/build-matrix:package-spec-provides spec)
+          (remove-duplicates
+           (mapcar #'oci-safe-name (append (list orig safe) provides))
+           :test #'string=))
     spec))
 
 (defun publish-built (reg namespace skip-catalog publish-ql-deps deps-dist-url
