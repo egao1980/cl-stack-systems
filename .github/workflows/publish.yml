@@ -1,0 +1,113 @@
+name: Publish imports
+
+# Discover imports/*/qlfile and publish each in an isolated matrix job
+# → ghcr.io/egao1980/cl-systems/<system>:<version>
+on:
+  push:
+    branches: [main]
+    paths:
+      - "imports/**"
+      - "scripts/publish-import.lisp"
+      - ".github/workflows/publish.yml"
+  workflow_dispatch:
+    inputs:
+      import:
+        description: "Single import directory under imports/ (empty = all)"
+        required: false
+        default: ""
+      registry:
+        description: "OCI registry"
+        required: false
+        default: "ghcr.io"
+      publish_ql_deps:
+        description: "ql-export unresolved deps (true/false)"
+        required: false
+        default: "false"
+
+env:
+  PACKAGER_TAG: "0.8.0"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      imports: ${{ steps.list.outputs.imports }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: list
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.import }}" ]; then
+            NAME="${{ inputs.import }}"
+            if [ ! -f "imports/${NAME}/qlfile" ]; then
+              echo "Missing imports/${NAME}/qlfile" >&2
+              exit 1
+            fi
+            jq -cn --arg i "$NAME" '[$i]' > /tmp/imports.json
+          else
+            find imports -mindepth 2 -maxdepth 2 -name qlfile -type f \
+              | sed 's|^imports/||; s|/qlfile$||' \
+              | sort \
+              | jq -R -s -c 'split("\n") | map(select(length>0))' \
+              > /tmp/imports.json
+          fi
+          echo "imports=$(cat /tmp/imports.json)" >> "$GITHUB_OUTPUT"
+          echo "Discovered:"
+          cat /tmp/imports.json
+
+  publish:
+    needs: discover
+    if: needs.discover.outputs.imports != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        import: ${{ fromJson(needs.discover.outputs.imports) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SBCL + git
+        run: sudo apt-get update && sudo apt-get install -y sbcl git
+
+      - name: Install Quicklisp
+        run: |
+          curl -fsSL -o /tmp/quicklisp.lisp https://beta.quicklisp.org/quicklisp.lisp
+          sbcl --noinform --non-interactive \
+            --load /tmp/quicklisp.lisp \
+            --eval '(quicklisp-quickstart:install :path #p"~/quicklisp/")'
+          sbcl --noinform --non-interactive \
+            --load ~/quicklisp/setup.lisp \
+            --eval '(ql-util:without-prompting (ql:add-to-init-file))'
+
+      - name: Install oras
+        uses: oras-project/setup-oras@v1
+        with:
+          version: 1.2.3
+
+      - name: Pull cl-repository-packager
+        run: |
+          CL_REPO_IMAGE="ghcr.io/egao1980/cl-repository/cl-repository-packager"
+          rm -rf /tmp/cl-repo-pull
+          mkdir -p /tmp/cl-repo-pull ~/.local/share/cl-systems
+          oras pull "${CL_REPO_IMAGE}:${PACKAGER_TAG}" -o /tmp/cl-repo-pull/
+          for f in /tmp/cl-repo-pull/*.tar.gz; do
+            tar -xzf "$f" -C ~/.local/share/cl-systems/
+          done
+
+      - name: Publish import
+        env:
+          PKG_QLFILE: imports/${{ matrix.import }}/qlfile
+          OCI_REGISTRY: ${{ inputs.registry || 'ghcr.io' }}
+          OCI_NAMESPACE: egao1980/cl-systems
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_CATALOG: "true"
+          PUBLISH_QL_DEPS: ${{ inputs.publish_ql_deps || 'false' }}
+        run: |
+          echo "=== $(cat "$PKG_QLFILE") ==="
+          sbcl --noinform --non-interactive --load scripts/publish-import.lisp
