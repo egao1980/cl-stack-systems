@@ -270,14 +270,19 @@
                            "https://beta.quicklisp.org/dist/quicklisp.txt")))
   (unless (and qlfile (probe-file qlfile))
     (error "PKG_QLFILE missing or not found: ~a" qlfile))
-  (let ((system-name (resolve-pkg-system qlfile)))
+  (let* ((system-name (resolve-pkg-system qlfile))
+         (*oci-package-name*
+          (or (env "PKG_OCI_NAME")
+              (let* ((dir (uiop:pathname-directory-pathname qlfile))
+                     (name (first (last (pathname-directory dir)))))
+                (when (stringp name) name)))))
     (when publish-ql-deps
       (ql:quickload :cl-repository-ql-exporter :silent t))
     (multiple-value-bind (reg registry-url)
         (make-registry registry)
       (declare (ignore registry-url))
-      (format t "~%Publishing import from ~a (system=~a) → ~a/~a~%"
-              qlfile system-name registry namespace)
+      (format t "~%Publishing import from ~a (system=~a oci=~a) → ~a/~a~%"
+              qlfile system-name *oci-package-name* registry namespace)
       (let ((entries (parse-qlfile qlfile))
             (published 0))
         (when (null entries)
