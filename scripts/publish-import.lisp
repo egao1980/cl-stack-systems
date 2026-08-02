@@ -21,6 +21,36 @@
 (defun env (name &optional default)
   (or (uiop:getenv name) default))
 
+;;; Packager 0.8.0 normalize-dep chokes on (:feature (:and …) "sys").
+;;; Patch until a newer packager ships the fix.
+(defun normalize-dep* (dep)
+  (cond
+    ((stringp dep) (string-downcase dep))
+    ((symbolp dep) (string-downcase (symbol-name dep)))
+    ((and (consp dep) (eq (first dep) :version) (>= (length dep) 3))
+     (cons (normalize-dep* (second dep)) (string (third dep))))
+    ((and (consp dep) (eq (first dep) :feature) (>= (length dep) 3))
+     (when (uiop:featurep (second dep))
+       (normalize-dep* (third dep))))
+    ((and (consp dep) (eq (first dep) :require))
+     nil)
+    ((consp dep)
+     (normalize-dep* (or (find-if #'stringp dep)
+                         (find-if #'symbolp dep)
+                         (second dep))))
+    (t nil)))
+
+(setf (fdefinition 'cl-repository-packager/asdf-plugin:normalize-dep)
+      #'normalize-dep*)
+
+(let ((orig (fdefinition 'cl-repository-packager/asdf-plugin:auto-package-spec)))
+  (setf (fdefinition 'cl-repository-packager/asdf-plugin:auto-package-spec)
+        (lambda (system-name)
+          (let ((spec (funcall orig system-name)))
+            (setf (cl-repository-packager/build-matrix:package-spec-depends-on spec)
+                  (remove nil (cl-repository-packager/build-matrix:package-spec-depends-on spec)))
+            spec))))
+
 (defun strip-comment (line)
   (let ((pos (position #\# line)))
     (if pos (subseq line 0 pos) line)))
