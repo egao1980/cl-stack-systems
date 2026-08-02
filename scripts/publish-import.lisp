@@ -23,10 +23,13 @@
   (let ((pos (position #\# line)))
     (if pos (subseq line 0 pos) line)))
 
+(defun whitespace-char-p (c)
+  (member c '(#\Space #\Tab #\Newline #\Return)))
+
 (defun split-ws (s)
-  (loop for start = 0 then (position-if-not #'uiop:whitespacep s :start end)
+  (loop for start = 0 then (position-if-not #'whitespace-char-p s :start end)
         while start
-        for end = (or (position-if #'uiop:whitespacep s :start start) (length s))
+        for end = (or (position-if #'whitespace-char-p s :start start) (length s))
         collect (subseq s start end)
         while (< end (length s))))
 
