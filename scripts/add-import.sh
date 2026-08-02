@@ -47,7 +47,7 @@ else
   fi
 fi
 
-NAME="$(echo "$NAME" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9._-' '-')"
+NAME="$(printf '%s' "$NAME" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9._-' '-' | sed -E 's/-+$//; s/^-+//; s/-+/-/g')"
 [[ -n "$NAME" ]] || die "empty import name"
 
 DIR="$ROOT/imports/$NAME"

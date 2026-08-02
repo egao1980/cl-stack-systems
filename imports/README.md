@@ -6,4 +6,6 @@ One directory per upstream pin. CI discovers `*/qlfile` and publishes each in is
 ../scripts/add-import.sh owner/repo v1.2.3
 ```
 
+See [IMPORTS.md](IMPORTS.md) for the current stack-seeded set.
+
 Do **not** put unrelated libraries in the same qlfile — that defeats isolation.
