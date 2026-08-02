@@ -36,6 +36,9 @@ Or hand-write `imports/<name>/qlfile`. Prefer pinned tags/SHAs.
 | Unmodified third-party Lisp dep | Add import here; publish to `cl-systems` |
 | Need patches / own CI / native overlays | Fork into `egao1980` (workspace checkout) |
 
+**Exclusive:** fork ⇒ remove `imports/<name>/` here. Import ⇒ do not also
+keep a workspace fork of that library.
+
 ## CI
 
 `.github/workflows/publish.yml` discovers `imports/*/qlfile` and publishes each in a

@@ -3,6 +3,10 @@
 Direct unforked third-party deps of current stack systems, plus one-hop
 support libs needed to load them. One directory per pin (CI isolation).
 
+**Exclusivity:** a library is either imported here **or** forked into the
+workspace — never both. Forking ⇒ delete `imports/<name>/`. Importing ⇒
+no workspace fork/checkout of that upstream.
+
 | Import | Source | Why |
 |--------|--------|-----|
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
