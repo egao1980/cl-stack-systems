@@ -182,8 +182,26 @@
     (values (cl-oci-client/registry:make-registry registry-url :auth auth)
             registry-url)))
 
+(defun oci-safe-name (name)
+  "GHCR paths cannot contain '+'; map cl+ssl → cl-plus-ssl."
+  (substitute #\- #\+ name))
+
+(defun ensure-oci-safe-spec (spec)
+  "Rewrite package name for OCI; keep original name in provides."
+  (let* ((orig (cl-repository-packager/build-matrix:package-spec-name spec))
+         (safe (oci-safe-name orig)))
+    (unless (string= orig safe)
+      (setf (cl-repository-packager/build-matrix:package-spec-name spec) safe)
+      (setf (cl-repository-packager/build-matrix:package-spec-provides spec)
+            (remove-duplicates
+             (append (list orig safe)
+                     (cl-repository-packager/build-matrix:package-spec-provides spec))
+             :test #'string=)))
+    spec))
+
 (defun publish-built (reg namespace skip-catalog publish-ql-deps deps-dist-url
                       registry-host spec result)
+  (ensure-oci-safe-spec spec)
   (let ((tag (or (cl-repository-packager/build-matrix:package-spec-version spec)
                  (cl-repository-packager/build-matrix:package-spec-revision spec)
                  "latest")))
@@ -196,10 +214,11 @@
      :skip-catalog skip-catalog)
     (cl-repository-packager/publisher:publish-package
      reg namespace tag result spec :skip-catalog skip-catalog)
-    (format t "~&Published ~a/~a/~a:~a~%"
+    (format t "~&Published ~a/~a/~a:~a (provides ~{~a~^, ~})~%"
             registry-host namespace
             (cl-repository-packager/build-matrix:package-spec-name spec)
-            tag)))
+            tag
+            (cl-repository-packager/build-matrix:package-spec-provides spec))))
 
 (defun resolve-pkg-system (qlfile)
   "ASDF system name: PKG_SYSTEM, else sibling `system` file, else import dir name."

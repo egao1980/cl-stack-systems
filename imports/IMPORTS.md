@@ -10,7 +10,7 @@ support libs needed to load them. One directory per pin (CI isolation).
 | cffi | github cffi/cffi | event-backend-*, cl-stack-brotli/zstd |
 | chipz | github sharplispers/chipz | http-protocol |
 | cl-base64 | github darabi/cl-base64 | cl-mime |
-| cl-plus-ssl | github cl-plus-ssl/cl-plus-ssl (`system` → `cl+ssl`) | cl-stack-ssl |
+| cl-plus-ssl | github cl-plus-ssl/cl-plus-ssl (`system` → `cl+ssl`; OCI name `cl-plus-ssl`) | cl-stack-ssl |
 | cl-ppcre | github edicl/cl-ppcre | cl-mime |
 | cl-qprint | github eugeneia/cl-qprint | cl-mime |
 | cl-unicode | github edicl/cl-unicode | cl-idna |
