@@ -1,6 +1,8 @@
 ;;; Publish source-only OCI packages for one imports/*/qlfile.
 ;;; Env:
 ;;;   PKG_QLFILE        path to qlfile (required)
+;;;   PKG_SYSTEM        ASDF system to publish (default: import dir name,
+;;;                     or contents of sibling `system` file)
 ;;;   OCI_REGISTRY      default ghcr.io
 ;;;   OCI_NAMESPACE     default egao1980/cl-systems
 ;;;   GITHUB_ACTOR / GITHUB_TOKEN
@@ -76,24 +78,36 @@
             (cl-repository-packager/build-matrix:package-spec-name spec)
             tag)))
 
+(defun resolve-pkg-system (qlfile)
+  "ASDF system name: PKG_SYSTEM, else sibling `system` file, else import dir name."
+  (or (env "PKG_SYSTEM")
+      (let ((system-file (merge-pathnames "system" (uiop:pathname-directory-pathname qlfile))))
+        (when (probe-file system-file)
+          (string-trim '(#\Space #\Tab #\Newline #\Return)
+                       (uiop:read-file-string system-file))))
+      (let* ((dir (uiop:pathname-directory-pathname qlfile))
+             (name (first (last (pathname-directory dir)))))
+        (when (stringp name) name))))
+
 (defun publish-github-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
-                             registry-host name ref)
+                             registry-host name ref system-name)
   (multiple-value-bind (spec result cleanup-fn)
       (cl-repository-packager/source-adapter:build-package-from-github
-       name :ref ref)
+       name :ref ref :system-name system-name)
     (unwind-protect
          (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
                         registry-host spec result)
       (when cleanup-fn (funcall cleanup-fn)))))
 
 (defun publish-git-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
-                          registry-host url ref)
+                          registry-host url ref system-name)
   (multiple-value-bind (source-dir revision cleanup-fn)
       (cl-repository-packager/source-adapter:clone-git-source url :ref ref)
     (unwind-protect
          (multiple-value-bind (spec result)
              (cl-repository-packager/source-adapter:build-package-from-source
-              source-dir :source-url url :revision revision)
+              source-dir :system-name system-name
+                         :source-url url :revision revision)
            (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
                           registry-host spec result))
       (when cleanup-fn (funcall cleanup-fn)))))
@@ -107,34 +121,36 @@
                            "https://beta.quicklisp.org/dist/quicklisp.txt")))
   (unless (and qlfile (probe-file qlfile))
     (error "PKG_QLFILE missing or not found: ~a" qlfile))
-  (when publish-ql-deps
-    (ql:quickload :cl-repository-ql-exporter :silent t))
-  (multiple-value-bind (reg registry-url)
-      (make-registry registry)
-    (declare (ignore registry-url))
-    (format t "~%Publishing import from ~a → ~a/~a~%" qlfile registry namespace)
-    (let ((entries (parse-qlfile qlfile))
-          (published 0))
-      (when (null entries)
-        (error "No entries in ~a" qlfile))
-      (dolist (entry entries)
-        (let ((kind (getf entry :kind))
-              (name (getf entry :name))
-              (ref (getf entry :ref)))
-          (cond
-            ((string= kind "github")
-             (publish-github-entry reg namespace skip-catalog publish-ql-deps
-                                   deps-dist-url registry name ref)
-             (incf published))
-            ((string= kind "git")
-             (publish-git-entry reg namespace skip-catalog publish-ql-deps
-                                deps-dist-url registry name ref)
-             (incf published))
-            ((string= kind "ql")
-             (format t "~&Skipping ql entry (expect already in registry): ~a~%"
-                     (getf entry :raw)))
-            (t
-             (format t "~&Warning: unsupported entry: ~a~%" (getf entry :raw))))))
-      (when (zerop published)
-        (error "No github/git entries published from ~a" qlfile))
-      (format t "~&Done: ~d package~:p from ~a~%" published qlfile))))
+  (let ((system-name (resolve-pkg-system qlfile)))
+    (when publish-ql-deps
+      (ql:quickload :cl-repository-ql-exporter :silent t))
+    (multiple-value-bind (reg registry-url)
+        (make-registry registry)
+      (declare (ignore registry-url))
+      (format t "~%Publishing import from ~a (system=~a) → ~a/~a~%"
+              qlfile system-name registry namespace)
+      (let ((entries (parse-qlfile qlfile))
+            (published 0))
+        (when (null entries)
+          (error "No entries in ~a" qlfile))
+        (dolist (entry entries)
+          (let ((kind (getf entry :kind))
+                (name (getf entry :name))
+                (ref (getf entry :ref)))
+            (cond
+              ((string= kind "github")
+               (publish-github-entry reg namespace skip-catalog publish-ql-deps
+                                     deps-dist-url registry name ref system-name)
+               (incf published))
+              ((string= kind "git")
+               (publish-git-entry reg namespace skip-catalog publish-ql-deps
+                                  deps-dist-url registry name ref system-name)
+               (incf published))
+              ((string= kind "ql")
+               (format t "~&Skipping ql entry (expect already in registry): ~a~%"
+                       (getf entry :raw)))
+              (t
+               (format t "~&Warning: unsupported entry: ~a~%" (getf entry :raw))))))
+        (when (zerop published)
+          (error "No github/git entries published from ~a" qlfile))
+        (format t "~&Done: ~d package~:p from ~a~%" published qlfile)))))
