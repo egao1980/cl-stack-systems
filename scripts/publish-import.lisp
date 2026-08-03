@@ -206,6 +206,34 @@
            :test #'string=))
     spec))
 
+(defun pin-as-oci-version (ref)
+  "Map qlfile/git pin to a consumer-friendly OCI tag.
+   v0.24.1 → 0.24.1; bare semver kept; branch/SHA pins → NIL (use ASDF/revision)."
+  (cond
+    ((null ref) nil)
+    ((zerop (length ref)) nil)
+    ((and (>= (length ref) 2)
+          (char-equal (char ref 0) #\v)
+          (digit-char-p (char ref 1)))
+     (subseq ref 1))
+    ((and (digit-char-p (char ref 0))
+          (every (lambda (c) (or (digit-char-p c) (char= c #\.))) ref)
+          (find #\. ref))
+     ref)
+    (t nil)))
+
+(defun apply-oci-version (spec &key pin env-version)
+  "Prefer PKG_VERSION, then version-looking qlfile pin, else leave packager default.
+   Needed for systems like cffi that omit :version in the .asd (git checkout)."
+  (let ((ver (or env-version (pin-as-oci-version pin))))
+    (when ver
+      (format t "~&; oci: forcing package version ~a (was ~a / rev ~a)~%"
+              ver
+              (cl-repository-packager/build-matrix:package-spec-version spec)
+              (cl-repository-packager/build-matrix:package-spec-revision spec))
+      (setf (cl-repository-packager/build-matrix:package-spec-version spec) ver)))
+  spec)
+
 (defun publish-built (reg namespace skip-catalog publish-ql-deps deps-dist-url
                       registry-host spec result)
   (ensure-oci-safe-spec spec)
@@ -244,8 +272,10 @@
       (cl-repository-packager/source-adapter:build-package-from-github
        name :ref ref :system-name system-name)
     (unwind-protect
-         (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
-                        registry-host spec result)
+         (progn
+           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION"))
+           (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
+                          registry-host spec result))
       (when cleanup-fn (funcall cleanup-fn)))))
 
 (defun publish-git-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
@@ -257,6 +287,7 @@
              (cl-repository-packager/source-adapter:build-package-from-source
               source-dir :system-name system-name
                          :source-url url :revision revision)
+           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION"))
            (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
                           registry-host spec result))
       (when cleanup-fn (funcall cleanup-fn)))))

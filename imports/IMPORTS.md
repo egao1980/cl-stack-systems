@@ -11,7 +11,7 @@ no workspace fork/checkout of that upstream.
 |--------|--------|-----|
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
 | babel | github cl-babel/babel | quri |
-| cffi | github cffi/cffi | event-backend-*, cl-stack-brotli/zstd |
+| cffi | github cffi/cffi `v0.24.1` → OCI `0.24.1` (asd has no `:version`; publish forces pin) | event-backend-*, cl-stack-brotli/zstd, http-backend-winhttp |
 | chipz | github sharplispers/chipz | http-protocol |
 | cl-base64 | github darabi/cl-base64 | cl-mime |
 | cl-plus-ssl | github cl-plus-ssl/cl-plus-ssl (`system` → `cl+ssl`; OCI name `cl-plus-ssl`) | cl-stack-ssl |
