@@ -1,14 +1,14 @@
 # Import index
 
-Direct unforked third-party deps of current stack systems, plus one-hop
-support libs needed to load them. One directory per pin (CI isolation).
+**Source-only** packages published to `ghcr.io/egao1980/cl-systems` via the shared
+workflow — third-party pins **and** first-party Lisp-only systems. One directory
+per pin (CI isolation). No per-repo publish scripts.
 
-**Exclusivity:** a library is either imported here **or** forked into the
-workspace — never both. Forking ⇒ delete `imports/<name>/`. Importing ⇒
-no workspace fork/checkout of that upstream.
+**Exclusivity:** do not import upstream `owner/X` while keeping a workspace fork of
+`X`. Importing `egao1980/X` (fork or first-party) while developing that repo locally
+is OK.
 
-Exception: `rove` imports **`egao1980/rove`** (parametrize pin) for OCI while the
-same fork may stay checked out for pin development. Do **not** also import
+Exception note: `rove` pins **`egao1980/rove`** (parametrize); do **not** also import
 `fukamachi/rove`.
 
 | Import | Source | Why |
@@ -31,13 +31,13 @@ same fork may stay checked out for pin development. Do **not** also import
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2 |
 | rove | github egao1980/rove `6ba5b74` (`deftest-parametrize`; upstream [fukamachi/rove#76](https://github.com/fukamachi/rove/pull/76)) | stack test runner / corpus tables |
 
-## Intentionally not here
+## Intentionally not here (yet / never)
 
 | System | Reason |
 |--------|--------|
-| cl-idna, http-protocol, event-*, cl-stack-* | first-party egao1980 |
-| quri, cl-mime | forked/patched — workspace checkout |
-| cl-mcp, cl-repository | forked tooling |
+| cl-stack-ssl, cl-stack-brotli, cl-stack-zstd, event-backend-* | **native overlays** — own publish via cl-repository reusable workflow |
+| cl-mcp, cl-repository | tooling; not `cl-systems` library pins |
+| http-protocol, event-protocol, cl-stack-*, cl-idna, quri, cl-mime, … | **migrate:** source-only first-party/forks should gain `imports/<name>/qlfile` here and drop per-repo `publish-source.lisp` |
 
 ## Deferred (dexador wave / cl+ssl transitive)
 
