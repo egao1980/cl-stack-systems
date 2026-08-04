@@ -1,7 +1,13 @@
 # cl-stack-systems
 
-Manifest repo for **source-only** republish of third-party Common Lisp libraries into
-`ghcr.io/egao1980/cl-systems` — **without forking**.
+Manifest repo for **source-only** OCI publish into `ghcr.io/egao1980/cl-systems`.
+
+Covers **unmodified third-party** and **first-party Lisp-only** packages (no native
+overlays). Publish is **convention-only**: `imports/<name>/qlfile` + shared
+`publish.yml` / `scripts/publish-import.lisp` — **no** per-package `publish-source.lisp`.
+
+Packages with native overlays stay in their own repos and use cl-repository’s
+reusable native publish workflow.
 
 Each import is an isolated unit under `imports/<name>/qlfile` so CI never co-loads
 incompatible dependency graphs.
@@ -29,15 +35,17 @@ github alexandria/alexandria v1.4
 
 Or hand-write `imports/<name>/qlfile`. Prefer pinned tags/SHAs.
 
-### When to use this vs a fork
+### When to use this vs a fork / native repo
 
 | Situation | Action |
 |-----------|--------|
-| Unmodified third-party Lisp dep | Add import here; publish to `cl-systems` |
-| Need patches / own CI / native overlays | Fork into `egao1980` (workspace checkout) |
+| Unmodified third-party (source-only) | Add import here |
+| First-party egao1980 **without** natives | Add import here (`github egao1980/<repo> <tag>`) — do **not** add repo-local publish scripts |
+| Patches only (still source-only) | Fork to `egao1980`, import the fork pin here |
+| Native overlays / grovel / CFFI libs | Own repo + cl-repository native publish workflow |
 
-**Exclusive:** fork ⇒ remove `imports/<name>/` here. Import ⇒ do not also
-keep a workspace fork of that library.
+**Exclusive:** never import upstream `owner/X` while also keeping a workspace fork of `X`.
+Importing `egao1980/X` while developing that fork locally is OK.
 
 ## CI
 
