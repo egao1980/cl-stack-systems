@@ -278,9 +278,10 @@ Consumers may QL-fallback until those imports land.~%"
      :publish-ql-deps publish-ql-deps
      :deps-dist-url deps-dist-url
      :skip-catalog skip-catalog)
-    (let ((attempts (parse-integer (or (env "PUBLISH_ATTEMPTS") "5") :junk-allowed t))
-          (attempts (max 1 (or attempts 5)))
-          (last-error nil))
+    (let* ((attempts (max 1 (or (parse-integer (or (env "PUBLISH_ATTEMPTS") "5")
+                                              :junk-allowed t)
+                                5)))
+           (last-error nil))
       (dotimes (i attempts)
         (handler-case
             (progn
