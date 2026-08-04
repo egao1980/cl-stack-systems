@@ -234,21 +234,67 @@
       (setf (cl-repository-packager/build-matrix:package-spec-version spec) ver)))
   spec)
 
+(defun ensure-dependencies-published* (spec registry-host namespace
+                                       &key publish-ql-deps deps-dist-url skip-catalog)
+  "Retry dependency visibility (parallel matrix races), then warn-and-continue.
+   Consumers may QL-fallback unpublished leftovers; STRICT_DEPS=true re-signals."
+  (let* ((attempts (max 1 (or (parse-integer (or (env "DEP_ENSURE_ATTEMPTS") "8")
+                                            :junk-allowed t)
+                              8)))
+         (strict (string-equal "true" (env "STRICT_DEPS" "false")))
+         (last-error nil))
+    (dotimes (i attempts)
+      (handler-case
+          (progn
+            (cl-repository-packager/source-adapter:ensure-dependencies-published
+             spec registry-host namespace
+             :publish-missing nil
+             :recursive nil
+             :publish-ql-dependencies publish-ql-deps
+             :deps-dist-url deps-dist-url
+             :skip-catalog skip-catalog)
+            (return-from ensure-dependencies-published* t))
+        (error (e)
+          (setf last-error e)
+          (format t "~&; deps ensure attempt ~a/~a failed: ~a~%"
+                  (1+ i) attempts e)
+          (unless (= (1+ i) attempts)
+            (sleep (* 10 (1+ i)))))))
+    (when strict
+      (error last-error))
+    (format t "~&; WARNING: proceeding with unpublished deps (~a). ~
+Consumers may QL-fallback until those imports land.~%"
+            last-error)
+    nil))
+
 (defun publish-built (reg namespace skip-catalog publish-ql-deps deps-dist-url
                       registry-host spec result)
   (ensure-oci-safe-spec spec)
   (let ((tag (or (cl-repository-packager/build-matrix:package-spec-version spec)
                  (cl-repository-packager/build-matrix:package-spec-revision spec)
                  "latest")))
-    (cl-repository-packager/source-adapter:ensure-dependencies-published
+    (ensure-dependencies-published*
      spec registry-host namespace
-     :publish-missing nil
-     :recursive nil
-     :publish-ql-dependencies publish-ql-deps
+     :publish-ql-deps publish-ql-deps
      :deps-dist-url deps-dist-url
      :skip-catalog skip-catalog)
-    (cl-repository-packager/publisher:publish-package
-     reg namespace tag result spec :skip-catalog skip-catalog)
+    (let* ((attempts (max 1 (or (parse-integer (or (env "PUBLISH_ATTEMPTS") "5")
+                                              :junk-allowed t)
+                                5)))
+           (last-error nil))
+      (dotimes (i attempts)
+        (handler-case
+            (progn
+              (cl-repository-packager/publisher:publish-package
+               reg namespace tag result spec :skip-catalog skip-catalog)
+              (setf last-error nil)
+              (return))
+          (error (e)
+            (setf last-error e)
+            (format t "~&; publish attempt ~a/~a failed: ~a~%" (1+ i) attempts e)
+            (unless (= (1+ i) attempts)
+              (sleep (* 15 (1+ i)))))))
+      (when last-error (error last-error)))
     (format t "~&Published ~a/~a/~a:~a (provides ~{~a~^, ~})~%"
             registry-host namespace
             (cl-repository-packager/build-matrix:package-spec-name spec)

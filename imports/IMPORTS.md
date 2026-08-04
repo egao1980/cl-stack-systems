@@ -45,9 +45,14 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 |--------|--------|-----|
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
 | babel | github cl-babel/babel | quri |
+| blackbird | github orthecreedence/blackbird `1ec17c5` | http-protocol, ws-protocol |
 | cffi | github cffi/cffi `v0.24.1` → OCI `0.24.1` (asd has no `:version`; publish forces pin) | event-backend-*, cl-stack-brotli/zstd, http-backend-winhttp |
 | chipz | github sharplispers/chipz | http-protocol |
+| cl-cookie | github fukamachi/cl-cookie `355f9c1` | http-protocol |
 | cl-base64 | github darabi/cl-base64 | cl-mime |
+| local-time | github dlowe-net/local-time `59d93f7` | cl-cookie |
+| proc-parse | github fukamachi/proc-parse `3afe2b7` | cl-cookie |
+| vom | github orthecreedence/vom `303c3f6` | blackbird |
 | cl-plus-ssl | github cl-plus-ssl/cl-plus-ssl (`system` → `cl+ssl`; OCI name `cl-plus-ssl`) | cl-stack-ssl |
 | cl-ppcre | github edicl/cl-ppcre | cl-mime |
 | cl-qprint | github eugeneia/cl-qprint | cl-mime |
