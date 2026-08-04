@@ -20,6 +20,7 @@ no workspace fork/checkout of that upstream.
 | cl-unicode | github edicl/cl-unicode | cl-idna |
 | cl-utilities | git gitlab.common-lisp.net/cl-utilities | cl-idna, quri |
 | flexi-streams | github edicl/flexi-streams | cl-qprint |
+| jose | github fukamachi/jose `345d8cf67ea7` | cl-stack-jwt (JWT); pulls ironclad/cl-json/assoc-utils/… via QL until imported |
 | salza2 | github xach/salza2 | http-protocol |
 | split-sequence | github sharplispers/split-sequence | quri |
 | trivial-features | github trivial-features/trivial-features | babel, cffi |
