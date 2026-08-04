@@ -7,6 +7,10 @@ support libs needed to load them. One directory per pin (CI isolation).
 workspace — never both. Forking ⇒ delete `imports/<name>/`. Importing ⇒
 no workspace fork/checkout of that upstream.
 
+Exception: `rove` imports **`egao1980/rove`** (parametrize pin) for OCI while the
+same fork may stay checked out for pin development. Do **not** also import
+`fukamachi/rove`.
+
 | Import | Source | Why |
 |--------|--------|-----|
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
@@ -25,6 +29,7 @@ no workspace fork/checkout of that upstream.
 | split-sequence | github sharplispers/split-sequence | quri |
 | trivial-features | github trivial-features/trivial-features | babel, cffi |
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2 |
+| rove | github egao1980/rove `6ba5b74` (`deftest-parametrize`; upstream [fukamachi/rove#76](https://github.com/fukamachi/rove/pull/76)) | stack test runner / corpus tables |
 
 ## Intentionally not here
 
@@ -33,7 +38,6 @@ no workspace fork/checkout of that upstream.
 | cl-idna, http-protocol, event-*, cl-stack-* | first-party egao1980 |
 | quri, cl-mime | forked/patched — workspace checkout |
 | cl-mcp, cl-repository | forked tooling |
-| rove | test-only |
 
 ## Deferred (dexador wave / cl+ssl transitive)
 
