@@ -33,7 +33,7 @@ jobs:
     outputs:
       imports: ${{ steps.list.outputs.imports }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - id: list
         shell: bash
@@ -69,7 +69,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install SBCL + git
         run: sudo apt-get update && sudo apt-get install -y sbcl git
@@ -85,7 +85,7 @@ jobs:
             --eval '(ql-util:without-prompting (ql:add-to-init-file))'
 
       - name: Install oras
-        uses: oras-project/setup-oras@v1
+        uses: oras-project/setup-oras@v2
         with:
           version: 1.2.3
 
