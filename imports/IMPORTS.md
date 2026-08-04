@@ -11,6 +11,36 @@ is OK.
 Exception note: `rove` pins **`egao1980/rove`** (parametrize); do **not** also import
 `fukamachi/rove`.
 
+Publish one import:
+
+```bash
+gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
+```
+
+## First-party / maintained forks (source-only)
+
+| Import | Source | Version @ pin | Why |
+|--------|--------|---------------|-----|
+| cl-idna | github egao1980/cl-idna `v0.1.0` | 0.1.0 | IDNA; quri |
+| cl-mime | github egao1980/cl-mime `89a3292` | 0.5.1 | MIME; http stack |
+| cl-stack-http | github egao1980/cl-stack-http `e90da3f` | 0.1.7 | HTTP DX facade |
+| cl-stack-jwt | github egao1980/cl-stack-jwt `v0.1.0` | 0.1.0 | JWT |
+| cl-stack-oauth2 | github egao1980/cl-stack-oauth2 `v0.1.0` | 0.1.0 | OAuth2 |
+| cl-stack-pathlib | github egao1980/cl-stack-pathlib `0811791` | 0.1.1 | pathlib |
+| event-protocol | github egao1980/event-protocol `30d9b37` | 0.1.1 | event loop protocol |
+| http-backend-async | github egao1980/http-backend-async `ffcea8f` | 0.2.4 | async HTTP backend |
+| http-backend-dexador | github egao1980/http-backend-dexador `fadc937` | 0.1.1 | dexador backend |
+| http-backend-winhttp | github egao1980/http-backend-winhttp `6876b5e` | 0.1.3 | WinHTTP backend |
+| http-encoding-brotli | github egao1980/http-encoding-brotli `8abc3f8` | 0.1.0 | brotli CE |
+| http-encoding-chipz | github egao1980/http-encoding-chipz `41db76a` | 0.1.0 | gzip/deflate CE |
+| http-encoding-zstd | github egao1980/http-encoding-zstd `38445e3` | 0.1.0 | zstd CE |
+| http-protocol | github egao1980/http-protocol `9177f63` | 0.2.3 | HTTP wire protocol |
+| quri | github egao1980/quri `v0.7.1` | 0.7.1 | URI (fork) |
+| ws-protocol | github egao1980/ws-protocol `0fc015e` | 0.2.2 | WebSocket protocol |
+| rove | github egao1980/rove `6ba5b74` (`deftest-parametrize`; upstream [fukamachi/rove#76](https://github.com/fukamachi/rove/pull/76)) | — | stack test runner |
+
+## Third-party
+
 | Import | Source | Why |
 |--------|--------|-----|
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
@@ -29,15 +59,13 @@ Exception note: `rove` pins **`egao1980/rove`** (parametrize); do **not** also i
 | split-sequence | github sharplispers/split-sequence | quri |
 | trivial-features | github trivial-features/trivial-features | babel, cffi |
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2 |
-| rove | github egao1980/rove `6ba5b74` (`deftest-parametrize`; upstream [fukamachi/rove#76](https://github.com/fukamachi/rove/pull/76)) | stack test runner / corpus tables |
 
-## Intentionally not here (yet / never)
+## Intentionally not here
 
 | System | Reason |
 |--------|--------|
 | cl-stack-ssl, cl-stack-brotli, cl-stack-zstd, event-backend-* | **native overlays** — own publish via cl-repository reusable workflow |
 | cl-mcp, cl-repository | tooling; not `cl-systems` library pins |
-| http-protocol, event-protocol, cl-stack-*, cl-idna, quri, cl-mime, … | **migrate:** source-only first-party/forks should gain `imports/<name>/qlfile` here and drop per-repo `publish-source.lisp` |
 
 ## Deferred (dexador wave / cl+ssl transitive)
 
