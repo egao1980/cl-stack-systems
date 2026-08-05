@@ -63,10 +63,22 @@
 (setf (fdefinition 'cl-repository-packager/asdf-plugin:normalize-dep)
       #'normalize-dep*)
 
+(defun asd-prelude-form-p (form)
+  "Forms that must be EVALed before later #. reader macros in the same .asd
+   (e.g. Postmodern cl-postgres.asd: defparameter *string-file* then #.*string-file*)."
+  (and (consp form)
+       (symbolp (first form))
+       (member (symbol-name (first form))
+               '("DEFPACKAGE" "IN-PACKAGE" "DEFPARAMETER" "DEFVAR" "DEFCONSTANT"
+                 "DEFUN" "DEFMACRO" "EVAL-WHEN" "SETF" "SETQ" "PSETF" "PSETQ"
+                 "PROGN" "LET" "LET*" "LOCALLY")
+               :test #'string-equal)))
+
 (defun discover-provided-systems* (source-dir)
   "Like packager discover, but allow #. in .asd (split-sequence, clingon, …).
    Bind *LOAD-PATHNAME* / *LOAD-TRUENAME* so #.(uiop:read-file-string
-   (uiop:subpathname *load-pathname* …)) works when READ-ing the .asd."
+   (uiop:subpathname *load-pathname* …)) works when READ-ing the .asd.
+   Also EVAL prelude forms so Postmodern-style `#.*string-file*` works."
   (let ((names nil)
         (*read-eval* t)
         (*package* (find-package :cl-user)))
@@ -80,14 +92,17 @@
                      (*load-truename* (or truename asd-path)))
                 (loop for form = (read s nil :eof)
                       until (eq form :eof)
-                      when (and (listp form)
-                                (symbolp (first form))
-                                (string-equal "DEFSYSTEM" (symbol-name (first form)))
-                                (second form))
-                        do (let ((name (etypecase (second form)
-                                         (string (second form))
-                                         (symbol (string-downcase (symbol-name (second form)))))))
-                             (pushnew name names :test #'string=))))))
+                      do (cond
+                           ((and (listp form)
+                                 (symbolp (first form))
+                                 (string-equal "DEFSYSTEM" (symbol-name (first form)))
+                                 (second form))
+                            (let ((name (etypecase (second form)
+                                          (string (second form))
+                                          (symbol (string-downcase (symbol-name (second form)))))))
+                              (pushnew name names :test #'string=)))
+                           ((asd-prelude-form-p form)
+                            (eval form)))))))
         (error () nil)))
     (nreverse names)))
 
