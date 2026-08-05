@@ -77,12 +77,29 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2, yason |
 | trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
 | yason | github phmarek/yason `0c84b29` → OCI `0.8.3` | json-backend-yason alternate |
+| dbi / cl-dbi / dbd-sqlite3 / dbd-postgres | github fukamachi/cl-dbi `2f4f8b4` → OCI `0.11.1` (dbd-* revision-tagged) | [`sql-protocol`](https://github.com/egao1980/sql-protocol) connectivity |
+| sqlite | github TeMPOraL/cl-sqlite `0.2.1` → OCI `0.2.1` | dbd-sqlite3 |
+| iterate | git gitlab.common-lisp.net/iterate/iterate `d27d7ff` → OCI `1.6.0` | sqlite, trivia.balland2006 |
+| cl-postgres | github marijnh/Postmodern `v1.33.12` → OCI `1.33.12` | dbd-postgres |
+| uax-15 | github sabracrolleton/uax-15 `v0.1.3` → OCI `0.1.3` | cl-postgres |
+| sxql | github fukamachi/sxql `72c1c8c` → OCI `0.1.0` | sql-query / mito |
+| trivia (+ balland2006 / trivial / level0–2) | github guicho271828/trivia `4383dd8` | sxql, mito |
+| type-i | github guicho271828/type-i `4407a68` | trivia.balland2006 |
+| lisp-namespace | github guicho271828/lisp-namespace `699fccb` | trivia.level2, type-i |
+| introspect-environment | github Bike/introspect-environment `69a50ac` | type-i |
+| trivial-cltl2 | github Zulu-Inuoe/trivial-cltl2 `2ada872` → OCI `0.1.1` | trivia.level2 |
+| cl-package-locks | github elliottjohnson/cl-package-locks `96a358e` → OCI `0.0.2` | sxql, mito |
+| mito / mito-core / mito-migration / lack-middleware-mito | github fukamachi/mito `8b9e53d` → OCI `0.2.0` | sql-orm |
+| dissect | github Shinmera/dissect `43b42a3` → OCI `1.0.0` | mito-core |
+| esrap | github scymtym/esrap `release-0.18` → OCI `0.18` | mito-migration |
+| trivial-with-current-source-form | github scymtym/trivial-with-current-source-form `d00f7ab` | esrap |
+| uuid | github dardoria/uuid `f0052f3` → OCI `2012.12.26` | mito-core; QL-fallback `trivial-utf-8` (mgl-pax-bootstrap) |
 
 ## Intentionally not here
 
 | System | Reason |
 |--------|--------|
-| First-party Lisp systems (`http-protocol`, backends, `ws-protocol`, encodings, `cl-stack-*`, `cl-mime`, `cl-idna`, `quri`, `event-protocol`, `rove`, …) | Publish from the **owning** `egao1980/<repo>` (`publish-checkout.yml`) |
+| First-party Lisp systems (`http-protocol`, backends, `ws-protocol`, encodings, `cl-stack-*`, `cl-mime`, `cl-idna`, `quri`, `event-protocol`, `sql-protocol`, `rove`, …) | Publish from the **owning** `egao1980/<repo>` (`publish-checkout.yml`) |
 | cl-stack-ssl, cl-stack-brotli, cl-stack-zstd, event-backend-* | **native overlays** — own publish via cl-repository reusable workflow |
 | cl-mcp, cl-repository | tooling; not `cl-systems` library pins |
 
@@ -90,3 +107,6 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 
 dexador, fast-http, trivial-mimes — add when http-protocol sync backend
 lands or when cl+ssl publish needs them explicitly.
+
+`trivial-utf-8` / `mgl-pax-bootstrap` / `autoload` — uuid transitive; leave QL-fallback until a pax-free pin or overlay story exists.
+Natives for SQL (libsqlite3 / libpq) — system packages in CI until overlays.
