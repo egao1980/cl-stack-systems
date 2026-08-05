@@ -47,6 +47,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | jose | github fukamachi/jose `345d8cf67ea7` → **OCI `0.1.0` published** | [`cl-stack-jwt`](https://github.com/egao1980/cl-stack-jwt) **0.1.0**; runtime QL-fallback for ironclad/cl-json/assoc-utils/trivial-utf-8 until those are imported |
 | salza2 | github xach/salza2 | http-protocol |
 | split-sequence | github sharplispers/split-sequence | quri |
+| tomlet | github fukamachi/tomlet `f55bf85` → OCI `0.1.0` | [`cl-stack-config`](https://github.com/egao1980/cl-stack-config) TOML parser (#99) |
 | trivial-features | github trivial-features/trivial-features | babel, cffi, float-features, bordeaux-threads |
 | trivial-garbage | github trivial-garbage/trivial-garbage `v0.21` → OCI `0.21` | bordeaux-threads |
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2, yason |
