@@ -28,7 +28,10 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cffi | github cffi/cffi `v0.24.1` → OCI `0.24.1` (asd has no `:version`; publish forces pin) | event-backend-*, cl-stack-brotli/zstd, http-backend-winhttp |
 | chipz | github sharplispers/chipz | http-protocol |
 | cl-cookie | github fukamachi/cl-cookie `355f9c1` | http-protocol |
-| com.inuoe.jzon | github Zulu-Inuoe/jzon `v1.1.4` / `99b19fb` → OCI `1.1.4` | [`json-protocol`](https://github.com/egao1980/json-protocol) default backend; closer-mop / float-features QL-fallback until imported |
+| closer-mop | git codeberg.org/pcostanza/closer-mop `f17d7fb` → OCI `1.0.0` | jzon / com.inuoe.jzon (GitHub upstream gone) |
+| com.inuoe.jzon | github Zulu-Inuoe/jzon `v1.1.4` / `99b19fb` → OCI `1.1.4` | [`json-protocol`](https://github.com/egao1980/json-protocol) default backend |
+| documentation-utils | git codeberg.org/shinmera/documentation-utils `cd5b506` → OCI `1.2.0` | float-features |
+| float-features | git codeberg.org/shinmera/float-features `136a908` → OCI `1.1.0` | jzon (non-ECL) |
 | cl-base64 | github darabi/cl-base64 | cl-mime |
 | local-time | github dlowe-net/local-time `59d93f7` | cl-cookie |
 | proc-parse | github fukamachi/proc-parse `3afe2b7` | cl-cookie |
@@ -42,8 +45,9 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | jose | github fukamachi/jose `345d8cf67ea7` → **OCI `0.1.0` published** | [`cl-stack-jwt`](https://github.com/egao1980/cl-stack-jwt) **0.1.0**; runtime QL-fallback for ironclad/cl-json/assoc-utils/trivial-utf-8 until those are imported |
 | salza2 | github xach/salza2 | http-protocol |
 | split-sequence | github sharplispers/split-sequence | quri |
-| trivial-features | github trivial-features/trivial-features | babel, cffi |
+| trivial-features | github trivial-features/trivial-features | babel, cffi, float-features |
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2 |
+| trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
 
 ## Intentionally not here
 
