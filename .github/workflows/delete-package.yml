@@ -1,0 +1,27 @@
+# Delete a GHCR package previously published from this repo so the owning
+# first-party repo can republish (GHCR write is tied to the linked repo).
+name: Delete cl-systems package
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package name under egao1980 (e.g. cl-systems/rove)"
+        required: true
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete package
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          set -euo pipefail
+          enc=$(python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['PACKAGE'], safe=''))")
+          echo "Deleting user package: ${PACKAGE}"
+          gh api -X DELETE "/user/packages/container/${enc}"
+          echo "Deleted ${PACKAGE}"
