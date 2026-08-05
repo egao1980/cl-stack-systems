@@ -29,6 +29,24 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cffi | github cffi/cffi `v0.24.1` → OCI `0.24.1` (asd has no `:version`; publish forces pin) | event-backend-*, cl-stack-brotli/zstd, http-backend-winhttp |
 | chipz | github sharplispers/chipz | http-protocol |
 | cl-cookie | github fukamachi/cl-cookie `355f9c1` | http-protocol |
+| chunga | github edicl/chunga `v1.1.9` → OCI `1.1.9` | hunchentoot |
+| cl-fad | github edicl/cl-fad `3f4d32d` → OCI `0.7.6` | hunchentoot |
+| clack | github fukamachi/clack `9435762` → OCI `2.1.0` | http-server-protocol app layer |
+| clack-handler-hunchentoot | github fukamachi/clack `9435762` → OCI `0.5.0` | default server backend |
+| clack-handler-woo | github fukamachi/woo `2ef0d22` | Woo Clack handler (Unix) |
+| clack-socket | github fukamachi/clack `9435762` → OCI `0.2.0` | clack-handler-hunchentoot |
+| hunchentoot | github edicl/hunchentoot `v1.3.1` → OCI `1.3.1` | http-server default (Windows+) |
+| ironclad | github sharplispers/ironclad `v0.61` → OCI `0.61` | lack-util |
+| lack | github fukamachi/lack `35d8b0a` → OCI `0.3.0` | Clack middleware builder |
+| lack-component | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | lack |
+| lack-middleware-backtrace | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | clack |
+| lack-util | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | lack / clack |
+| lev | github fukamachi/lev `b43e700` | woo (libev bindings) |
+| md5 | github pmai/md5 `906593f` → OCI `2.0.4` | hunchentoot |
+| rfc2388 | github jdz/rfc2388 `591bcf7` → OCI `1.5` | hunchentoot multipart |
+| trivial-backtrace | github gwkkwg/trivial-backtrace `7f90b4a` → OCI `1.1.0` | hunchentoot |
+| usocket | github usocket/usocket `v0.8.9` → OCI `0.8.9` | hunchentoot, clack |
+| woo | github fukamachi/woo `2ef0d22` → OCI `0.12.0` | http-server Unix backend |
 | closer-mop | git codeberg.org/pcostanza/closer-mop `f17d7fb` → OCI `1.0.0` | jzon / com.inuoe.jzon (GitHub upstream gone) |
 | com.inuoe.jzon | github Zulu-Inuoe/jzon `v1.1.4` / `99b19fb` → OCI `1.1.4` | [`json-protocol`](https://github.com/egao1980/json-protocol) default backend |
 | documentation-utils | git codeberg.org/shinmera/documentation-utils `cd5b506` → OCI `1.2.0` | float-features |
@@ -64,5 +82,5 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 
 ## Deferred (dexador wave / cl+ssl transitive)
 
-dexador, fast-http, chunga, trivial-mimes, usocket — add when
-http-protocol sync backend lands or when cl+ssl publish needs them explicitly.
+dexador, fast-http, trivial-mimes — add when http-protocol sync backend
+lands or when cl+ssl publish needs them explicitly.
