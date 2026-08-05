@@ -1,10 +1,15 @@
 # cl-stack-systems
 
-Manifest repo for **source-only** OCI publish into `ghcr.io/egao1980/cl-systems`.
+Manifest repo for **third-party / unmodified** source-only OCI publish into
+`ghcr.io/egao1980/cl-systems`.
 
-Covers **unmodified third-party** and **first-party Lisp-only** packages (no native
-overlays). Publish is **convention-only**: `imports/<name>/qlfile` + shared
-`publish.yml` / `scripts/publish-import.lisp` — **no** per-package `publish-source.lisp`.
+Publish is **convention-only**: `imports/<name>/qlfile` + shared `publish.yml` /
+`scripts/publish-import.lisp` — **no** per-package publish scripts.
+
+**First-party `egao1980/<repo>` packages publish from the owning repo**
+(`publish-checkout.yml` or the native reusable workflow). GHCR package write is
+tied to the owning GitHub repo — `cl-stack-systems` cannot push those packages
+(`permission_denied: write_package`).
 
 Packages with native overlays stay in their own repos and use cl-repository’s
 reusable native publish workflow.
@@ -40,12 +45,11 @@ Or hand-write `imports/<name>/qlfile`. Prefer pinned tags/SHAs.
 | Situation | Action |
 |-----------|--------|
 | Unmodified third-party (source-only) | Add import here |
-| First-party egao1980 **without** natives | Add import here (`github egao1980/<repo> <tag>`) — do **not** add repo-local publish scripts |
-| Patches only (still source-only) | Fork to `egao1980`, import the fork pin here |
+| First-party egao1980 (Lisp-only) | Publish from that repo (`publish-checkout.yml`) — **not** here |
+| Patches only (still source-only) | Fork to `egao1980`, publish from the fork (or import the fork pin here only if you will never own the GHCR package under the fork) |
 | Native overlays / grovel / CFFI libs | Own repo + cl-repository native publish workflow |
 
 **Exclusive:** never import upstream `owner/X` while also keeping a workspace fork of `X`.
-Importing `egao1980/X` while developing that fork locally is OK.
 
 ## CI
 
