@@ -22,7 +22,11 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 
 | Import | Source | Why |
 |--------|--------|-----|
+| adopt | github sjl/adopt `v1.3.0` | cli-backend-adopt |
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
+| bobbin | github sjl/bobbin `v1.0.1` | clingon, adopt |
+| clingon | github dnaeon/clingon `v0.7.0` | cli-backend-clingon |
+| cl-reexport | github takagi/cl-reexport `03ad7a0` | clingon |
 | babel | github cl-babel/babel | quri |
 | blackbird | github orthecreedence/blackbird `1ec17c5` | http-protocol, ws-protocol |
 | bordeaux-threads | github sionescu/bordeaux-threads `v0.9.4` → OCI `0.9.4` (bt2 API) | concurrency default (#95); global-vars + trivial-garbage |
@@ -38,6 +42,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | hunchentoot | github edicl/hunchentoot `v1.3.1` → OCI `1.3.1` | http-server default (Windows+) |
 | ironclad | github sharplispers/ironclad `v0.61` → OCI `0.61` | lack-util |
 | lack | github fukamachi/lack `35d8b0a` → OCI `0.3.0` | Clack middleware builder |
+| log4cl | github sharplispers/log4cl `v1.1.2` | log-backend-log4cl |
 | lack-component | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | lack |
 | lack-middleware-backtrace | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | clack |
 | lack-util | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | lack / clack |
@@ -54,7 +59,8 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cl-base64 | github darabi/cl-base64 | cl-mime |
 | local-time | github dlowe-net/local-time `59d93f7` | cl-cookie |
 | proc-parse | github fukamachi/proc-parse `3afe2b7` | cl-cookie |
-| vom | github orthecreedence/vom `303c3f6` | blackbird |
+| vom | github orthecreedence/vom `303c3f6` | blackbird; log-backend-vom |
+| with-user-abort | github compufox/with-user-abort `a3db02e` | clingon |
 | cl-plus-ssl | github cl-plus-ssl/cl-plus-ssl (`system` → `cl+ssl`; OCI name `cl-plus-ssl`) | cl-stack-ssl |
 | cl-ppcre | github edicl/cl-ppcre | cl-mime |
 | cl-qprint | github eugeneia/cl-qprint | cl-mime |
