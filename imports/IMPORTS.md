@@ -25,6 +25,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
 | babel | github cl-babel/babel | quri |
 | blackbird | github orthecreedence/blackbird `1ec17c5` | http-protocol, ws-protocol |
+| bordeaux-threads | github sionescu/bordeaux-threads `v0.9.4` → OCI `0.9.4` (bt2 API) | concurrency default (#95); global-vars + trivial-garbage |
 | cffi | github cffi/cffi `v0.24.1` → OCI `0.24.1` (asd has no `:version`; publish forces pin) | event-backend-*, cl-stack-brotli/zstd, http-backend-winhttp |
 | chipz | github sharplispers/chipz | http-protocol |
 | cl-cookie | github fukamachi/cl-cookie `355f9c1` | http-protocol |
@@ -42,12 +43,15 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cl-unicode | github edicl/cl-unicode | cl-idna |
 | cl-utilities | git gitlab.common-lisp.net/cl-utilities | cl-idna, quri |
 | flexi-streams | github edicl/flexi-streams | cl-qprint |
+| global-vars | github lmj/global-vars `c749f32` → OCI `1.0.0` | bordeaux-threads |
 | jose | github fukamachi/jose `345d8cf67ea7` → **OCI `0.1.0` published** | [`cl-stack-jwt`](https://github.com/egao1980/cl-stack-jwt) **0.1.0**; runtime QL-fallback for ironclad/cl-json/assoc-utils/trivial-utf-8 until those are imported |
 | salza2 | github xach/salza2 | http-protocol |
 | split-sequence | github sharplispers/split-sequence | quri |
-| trivial-features | github trivial-features/trivial-features | babel, cffi, float-features |
-| trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2 |
+| trivial-features | github trivial-features/trivial-features | babel, cffi, float-features, bordeaux-threads |
+| trivial-garbage | github trivial-garbage/trivial-garbage `v0.21` → OCI `0.21` | bordeaux-threads |
+| trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2, yason |
 | trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
+| yason | github phmarek/yason `0c84b29` → OCI `0.8.3` | json-backend-yason alternate |
 
 ## Intentionally not here
 
@@ -59,6 +63,5 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 
 ## Deferred (dexador wave / cl+ssl transitive)
 
-dexador, fast-http, chunga, trivial-mimes, bordeaux-threads,
-usocket, trivial-garbage — add when http-protocol sync backend lands or
-when cl+ssl publish needs them explicitly.
+dexador, fast-http, chunga, trivial-mimes, usocket — add when
+http-protocol sync backend lands or when cl+ssl publish needs them explicitly.
