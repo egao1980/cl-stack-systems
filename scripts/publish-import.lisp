@@ -64,7 +64,9 @@
       #'normalize-dep*)
 
 (defun discover-provided-systems* (source-dir)
-  "Like packager discover, but allow #. in .asd (split-sequence etc.)."
+  "Like packager discover, but allow #. in .asd (split-sequence, clingon, …).
+   Bind *LOAD-PATHNAME* / *LOAD-TRUENAME* so #.(uiop:read-file-string
+   (uiop:subpathname *load-pathname* …)) works when READ-ing the .asd."
   (let ((names nil)
         (*read-eval* t)
         (*package* (find-package :cl-user)))
@@ -73,16 +75,19 @@
       (handler-case
           (with-open-file (s asd-path :direction :input :if-does-not-exist nil)
             (when s
-              (loop for form = (read s nil :eof)
-                    until (eq form :eof)
-                    when (and (listp form)
-                              (symbolp (first form))
-                              (string-equal "DEFSYSTEM" (symbol-name (first form)))
-                              (second form))
-                      do (let ((name (etypecase (second form)
-                                       (string (second form))
-                                       (symbol (string-downcase (symbol-name (second form)))))))
-                           (pushnew name names :test #'string=)))))
+              (let* ((truename (ignore-errors (truename asd-path)))
+                     (*load-pathname* asd-path)
+                     (*load-truename* (or truename asd-path)))
+                (loop for form = (read s nil :eof)
+                      until (eq form :eof)
+                      when (and (listp form)
+                                (symbolp (first form))
+                                (string-equal "DEFSYSTEM" (symbol-name (first form)))
+                                (second form))
+                        do (let ((name (etypecase (second form)
+                                         (string (second form))
+                                         (symbol (string-downcase (symbol-name (second form)))))))
+                             (pushnew name names :test #'string=))))))
         (error () nil)))
     (nreverse names)))
 
