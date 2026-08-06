@@ -80,7 +80,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | dbi / cl-dbi / dbd-sqlite3 / dbd-postgres | github fukamachi/cl-dbi `2f4f8b4` → OCI `0.11.1` (dbd-* revision-tagged) | [`sql-protocol`](https://github.com/egao1980/sql-protocol) connectivity |
 | sqlite | github TeMPOraL/cl-sqlite `0.2.1` → OCI `0.2.1` | dbd-sqlite3 |
 | iterate | git gitlab.common-lisp.net/iterate/iterate `d27d7ff` → OCI `1.6.0` | sqlite, trivia.balland2006 |
-| cl-postgres | github marijnh/Postmodern `v1.33.12` → OCI `1.33.12` | dbd-postgres |
+| cl-postgres | github marijnh/Postmodern `v1.33.12` → **OCI `1.33.12` published** | dbd-postgres |
 | uax-15 | github sabracrolleton/uax-15 `v0.1.3` → OCI `0.1.3` | cl-postgres |
 | sxql | github fukamachi/sxql `72c1c8c` → OCI `0.1.0` | sql-query / mito |
 | trivia (+ balland2006 / trivial / level0–2) | github guicho271828/trivia `4383dd8` | sxql, mito |
