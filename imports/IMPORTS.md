@@ -93,7 +93,8 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | dissect | github Shinmera/dissect `43b42a3` → OCI `1.0.0` | mito-core |
 | esrap | github scymtym/esrap `release-0.18` → OCI `0.18` | mito-migration |
 | trivial-with-current-source-form | github scymtym/trivial-with-current-source-form `d00f7ab` | esrap |
-| uuid | github dardoria/uuid `f0052f3` → OCI `2012.12.26` | mito-core; QL-fallback `trivial-utf-8` (mgl-pax-bootstrap) |
+| uuid | github dardoria/uuid `f0052f3` → OCI `2012.12.26` | mito-core |
+| trivial-utf-8 | git gitlab.common-lisp.net/trivial-utf-8 `3cd943e` (pre-mgl-pax) → OCI `0.1.0` | uuid; pin avoids mgl-pax-bootstrap |
 
 ## Intentionally not here
 
@@ -108,5 +109,6 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 dexador, fast-http, trivial-mimes — add when http-protocol sync backend
 lands or when cl+ssl publish needs them explicitly.
 
-`trivial-utf-8` / `mgl-pax-bootstrap` / `autoload` — uuid transitive; leave QL-fallback until a pax-free pin or overlay story exists.
 Natives for SQL (libsqlite3 / libpq) — system packages in CI until overlays.
+
+`mgl-pax` / full doc tooling — not imported; `trivial-utf-8` pinned to pre-bootstrap commit.
