@@ -91,10 +91,10 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cl-package-locks | github elliottjohnson/cl-package-locks `96a358e` → OCI `0.0.2` | sxql, mito |
 | mito / mito-core / mito-migration / lack-middleware-mito | github fukamachi/mito `8b9e53d` → OCI `0.2.0` | sql-orm |
 | dissect | github Shinmera/dissect `43b42a3` → OCI `1.0.0` | mito-core |
-| esrap | github scymtym/esrap `release-0.18` → OCI `0.18` | mito-migration |
+| esrap | github scymtym/esrap `release-0.18` → **OCI `0.18` published** | mito-migration |
 | trivial-with-current-source-form | github scymtym/trivial-with-current-source-form `d00f7ab` | esrap |
 | uuid | github dardoria/uuid `f0052f3` → OCI `2012.12.26` | mito-core |
-| trivial-utf-8 | git gitlab.common-lisp.net/trivial-utf-8 `3cd943e` (pre-mgl-pax) → OCI `0.1.0` | uuid; pin avoids mgl-pax-bootstrap |
+| trivial-utf-8 | git gitlab.common-lisp.net/trivial-utf-8 `3cd943e` (pre-mgl-pax) → **OCI `0.1.0` published** | uuid; pin avoids mgl-pax-bootstrap |
 
 ## Intentionally not here
 
