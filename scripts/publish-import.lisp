@@ -128,6 +128,48 @@
 (setf (fdefinition 'cl-repository-packager/source-adapter::resolve-system-name)
       #'resolve-system-name*)
 
+(defun oci-annotation-string (value)
+  "OCI annotation values MUST be strings (GHCR → MANIFEST_INVALID otherwise).
+   ASDF :author can be a list (esrap); coerce + collapse whitespace."
+  (cond
+    ((null value) nil)
+    ((stringp value)
+     (let ((s (string-trim '(#\Space #\Tab #\Newline #\Return) value)))
+       (when (plusp (length s))
+         (with-output-to-string (out)
+           (loop for c across s
+                 do (write-char (if (member c '(#\Newline #\Return #\Tab)) #\Space c)
+                                out))))))
+    ((and (consp value) (every #'stringp value))
+     (oci-annotation-string (format nil "~{~a~^, ~}" value)))
+    (t (oci-annotation-string (princ-to-string value)))))
+
+(defun test-system-name-p (name)
+  "Skip *-test(s) / */test(s) provides — GHCR nested paths like esrap/tests are hostile."
+  (let ((n (string-downcase (string name))))
+    (or (search "/test" n)
+        (search "-test" n)
+        (search ".test" n))))
+
+(defun make-annotations* (spec)
+  "Like packager make-annotations, but stringify author/description (OCI requires strings)."
+  (setf (cl-repository-packager/build-matrix:package-spec-author spec)
+        (oci-annotation-string
+         (cl-repository-packager/build-matrix:package-spec-author spec)))
+  (setf (cl-repository-packager/build-matrix:package-spec-description spec)
+        (oci-annotation-string
+         (cl-repository-packager/build-matrix:package-spec-description spec)))
+  (let ((provides (cl-repository-packager/build-matrix:package-spec-provides spec)))
+    (when provides
+      (setf (cl-repository-packager/build-matrix:package-spec-provides spec)
+            (remove-if #'test-system-name-p provides))))
+  (funcall (get 'make-annotations* 'orig) spec))
+
+(setf (get 'make-annotations* 'orig)
+      (fdefinition 'cl-repository-packager/build-matrix:make-annotations))
+(setf (fdefinition 'cl-repository-packager/build-matrix:make-annotations)
+      #'make-annotations*)
+
 (defun manual-package-spec (system-name source-dir)
   "Fallback when auto-package-spec still fails (complex .asd metadata)."
   (let* ((system (asdf:find-system system-name nil))
@@ -242,10 +284,18 @@
      ref)
     (t nil)))
 
-(defun apply-oci-version (spec &key pin env-version)
-  "Prefer PKG_VERSION, then version-looking qlfile pin, else leave packager default.
-   Needed for systems like cffi that omit :version in the .asd (git checkout)."
-  (let ((ver (or env-version (pin-as-oci-version pin))))
+(defun sibling-version-file (qlfile)
+  "Optional imports/<name>/version — force OCI tag when .asd omits :version."
+  (let ((path (merge-pathnames "version" (uiop:pathname-directory-pathname qlfile))))
+    (when (probe-file path)
+      (let ((v (string-trim '(#\Space #\Tab #\Newline #\Return)
+                            (uiop:read-file-string path))))
+        (when (plusp (length v)) v)))))
+
+(defun apply-oci-version (spec &key pin env-version version-file)
+  "Prefer PKG_VERSION, then imports/*/version, then version-looking qlfile pin,
+   else leave packager default. Needed for systems like cffi that omit :version."
+  (let ((ver (or env-version version-file (pin-as-oci-version pin))))
     (when ver
       (format t "~&; oci: forcing package version ~a (was ~a / rev ~a)~%"
               ver
@@ -333,19 +383,20 @@ Consumers may QL-fallback until those imports land.~%"
         (when (stringp name) name))))
 
 (defun publish-github-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
-                             registry-host name ref system-name)
+                             registry-host name ref system-name &key version-file)
   (multiple-value-bind (spec result cleanup-fn)
       (cl-repository-packager/source-adapter:build-package-from-github
        name :ref ref :system-name system-name)
     (unwind-protect
          (progn
-           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION"))
+           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION")
+                              :version-file version-file)
            (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
                           registry-host spec result))
       (when cleanup-fn (funcall cleanup-fn)))))
 
 (defun publish-git-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
-                          registry-host url ref system-name)
+                          registry-host url ref system-name &key version-file)
   (multiple-value-bind (source-dir revision cleanup-fn)
       (cl-repository-packager/source-adapter:clone-git-source url :ref ref)
     (unwind-protect
@@ -353,7 +404,8 @@ Consumers may QL-fallback until those imports land.~%"
              (cl-repository-packager/source-adapter:build-package-from-source
               source-dir :system-name system-name
                          :source-url url :revision revision)
-           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION"))
+           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION")
+                              :version-file version-file)
            (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
                           registry-host spec result))
       (when cleanup-fn (funcall cleanup-fn)))))
@@ -368,6 +420,7 @@ Consumers may QL-fallback until those imports land.~%"
   (unless (and qlfile (probe-file qlfile))
     (error "PKG_QLFILE missing or not found: ~a" qlfile))
   (let* ((system-name (resolve-pkg-system qlfile))
+         (version-file (sibling-version-file qlfile))
          (*oci-package-name*
           (or (env "PKG_OCI_NAME")
               (let* ((dir (uiop:pathname-directory-pathname qlfile))
@@ -391,11 +444,13 @@ Consumers may QL-fallback until those imports land.~%"
             (cond
               ((string= kind "github")
                (publish-github-entry reg namespace skip-catalog publish-ql-deps
-                                     deps-dist-url registry name ref system-name)
+                                     deps-dist-url registry name ref system-name
+                                     :version-file version-file)
                (incf published))
               ((string= kind "git")
                (publish-git-entry reg namespace skip-catalog publish-ql-deps
-                                  deps-dist-url registry name ref system-name)
+                                  deps-dist-url registry name ref system-name
+                                  :version-file version-file)
                (incf published))
               ((string= kind "ql")
                (format t "~&Skipping ql entry (expect already in registry): ~a~%"
