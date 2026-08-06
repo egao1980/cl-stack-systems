@@ -151,24 +151,29 @@
         (search "-test" n)
         (search ".test" n))))
 
+(defun bm-sym (name)
+  "Internal build-matrix symbol (author/make-annotations not always exported in 0.12.0)."
+  (or (find-symbol name :cl-repository-packager/build-matrix)
+      (error "missing build-matrix symbol ~a" name)))
+
+(defun bm-slot (spec slot-name)
+  (slot-value spec (bm-sym slot-name)))
+
+(defun (setf bm-slot) (value spec slot-name)
+  (setf (slot-value spec (bm-sym slot-name)) value))
+
 (defun make-annotations* (spec)
   "Like packager make-annotations, but stringify author/description (OCI requires strings)."
-  (setf (cl-repository-packager/build-matrix:package-spec-author spec)
-        (oci-annotation-string
-         (cl-repository-packager/build-matrix:package-spec-author spec)))
-  (setf (cl-repository-packager/build-matrix:package-spec-description spec)
-        (oci-annotation-string
-         (cl-repository-packager/build-matrix:package-spec-description spec)))
-  (let ((provides (cl-repository-packager/build-matrix:package-spec-provides spec)))
+  (setf (bm-slot spec "AUTHOR") (oci-annotation-string (bm-slot spec "AUTHOR")))
+  (setf (bm-slot spec "DESCRIPTION") (oci-annotation-string (bm-slot spec "DESCRIPTION")))
+  (let ((provides (bm-slot spec "PROVIDES")))
     (when provides
-      (setf (cl-repository-packager/build-matrix:package-spec-provides spec)
-            (remove-if #'test-system-name-p provides))))
+      (setf (bm-slot spec "PROVIDES") (remove-if #'test-system-name-p provides))))
   (funcall (get 'make-annotations* 'orig) spec))
 
-(setf (get 'make-annotations* 'orig)
-      (fdefinition 'cl-repository-packager/build-matrix:make-annotations))
-(setf (fdefinition 'cl-repository-packager/build-matrix:make-annotations)
-      #'make-annotations*)
+(let ((make-ann (bm-sym "MAKE-ANNOTATIONS")))
+  (setf (get 'make-annotations* 'orig) (fdefinition make-ann))
+  (setf (fdefinition make-ann) #'make-annotations*))
 
 (defun manual-package-spec (system-name source-dir)
   "Fallback when auto-package-spec still fails (complex .asd metadata)."
