@@ -1,1 +1,3 @@
-github edicl/cl-unicode v0.1.6
+# edicl/cl-unicode#22 (IDNA mappings) landed on master after tag v0.1.6 (2019-04).
+# Pin post-#22 master so OCI ships idna-mapping for cl-idna / quri (cl-stack#164).
+github edicl/cl-unicode 07e7ff58913fb31f78f500e1be84ee2270bb6e30
