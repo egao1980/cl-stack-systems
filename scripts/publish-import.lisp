@@ -290,7 +290,8 @@
     (t nil)))
 
 (defun sibling-version-file (qlfile)
-  "Optional imports/<name>/version — force OCI tag when .asd omits :version."
+  "Optional imports/<name>/version — force the package version (tag, tarball
+   prefix, annotations) when .asd omits or lags :version."
   (let ((path (merge-pathnames "version" (uiop:pathname-directory-pathname qlfile))))
     (when (probe-file path)
       (let ((v (string-trim '(#\Space #\Tab #\Newline #\Return)
@@ -387,32 +388,57 @@ Consumers may QL-fallback until those imports land.~%"
              (name (first (last (pathname-directory dir)))))
         (when (stringp name) name))))
 
+(defun build-spec-from-source (source-dir system-name source-url revision)
+  "Spec only — mirror of packager build-package-from-source minus the build.
+   Version overrides must land on the spec BEFORE build-package runs, or the
+   tarball prefix, config blob, and OCI annotations keep the .asd version
+   while only the tag gets the forced one (cl-unicode 0.1.7 shipped a
+   cl-unicode-0.1.6/ tarball this way)."
+  (let ((resolved (cl-repository-packager/source-adapter::resolve-system-name
+                   source-dir system-name)))
+    (asdf:initialize-source-registry
+     `(:source-registry (:tree ,(namestring source-dir)) :inherit-configuration))
+    (asdf:clear-system resolved)
+    (let ((spec (cl-repository-packager/asdf-plugin:auto-package-spec resolved)))
+      (setf (cl-repository-packager/build-matrix:package-spec-source-url spec) source-url)
+      (setf (cl-repository-packager/build-matrix:package-spec-revision spec) revision)
+      spec)))
+
+(defun publish-entry-from-source (reg namespace skip-catalog publish-ql-deps deps-dist-url
+                                  registry-host source-dir revision
+                                  &key system-name source-url pin version-file)
+  (let ((spec (build-spec-from-source source-dir system-name source-url revision)))
+    (apply-oci-version spec :pin pin :env-version (env "PKG_VERSION")
+                       :version-file version-file)
+    (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
+                   registry-host spec
+                   (cl-repository-packager/build-matrix:build-package spec))))
+
 (defun publish-github-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
                              registry-host name ref system-name &key version-file)
-  (multiple-value-bind (spec result cleanup-fn)
-      (cl-repository-packager/source-adapter:build-package-from-github
-       name :ref ref :system-name system-name)
-    (unwind-protect
-         (progn
-           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION")
-                              :version-file version-file)
-           (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
-                          registry-host spec result))
-      (when cleanup-fn (funcall cleanup-fn)))))
+  (let ((repo-url (cl-repository-packager/source-adapter:github-repo-url name)))
+    (multiple-value-bind (source-dir revision cleanup-fn)
+        (cl-repository-packager/source-adapter:clone-git-source repo-url :ref ref)
+      (unwind-protect
+           (publish-entry-from-source
+            reg namespace skip-catalog publish-ql-deps deps-dist-url
+            registry-host source-dir revision
+            :system-name system-name
+            :source-url (format nil "https://github.com/~a"
+                                (cl-repository-packager/source-adapter:normalize-github-repo name))
+            :pin ref :version-file version-file)
+        (when cleanup-fn (funcall cleanup-fn))))))
 
 (defun publish-git-entry (reg namespace skip-catalog publish-ql-deps deps-dist-url
                           registry-host url ref system-name &key version-file)
   (multiple-value-bind (source-dir revision cleanup-fn)
       (cl-repository-packager/source-adapter:clone-git-source url :ref ref)
     (unwind-protect
-         (multiple-value-bind (spec result)
-             (cl-repository-packager/source-adapter:build-package-from-source
-              source-dir :system-name system-name
-                         :source-url url :revision revision)
-           (apply-oci-version spec :pin ref :env-version (env "PKG_VERSION")
-                              :version-file version-file)
-           (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
-                          registry-host spec result))
+         (publish-entry-from-source
+          reg namespace skip-catalog publish-ql-deps deps-dist-url
+          registry-host source-dir revision
+          :system-name system-name :source-url url
+          :pin ref :version-file version-file)
       (when cleanup-fn (funcall cleanup-fn)))))
 
 (let* ((qlfile (env "PKG_QLFILE"))
