@@ -64,7 +64,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cl-plus-ssl | github cl-plus-ssl/cl-plus-ssl (`system` → `cl+ssl`; OCI name `cl-plus-ssl`) | cl-stack-ssl |
 | cl-ppcre | github edicl/cl-ppcre | cl-mime |
 | cl-qprint | github eugeneia/cl-qprint | cl-mime |
-| cl-unicode | github edicl/cl-unicode | cl-idna |
+| cl-unicode | github edicl/cl-unicode `07e7ff5` (master post-#22 IDNA) → OCI **0.1.7** | cl-idna; tag v0.1.6 predates IDNA (cl-stack#164) |
 | cl-utilities | git gitlab.common-lisp.net/cl-utilities | cl-idna, quri |
 | flexi-streams | github edicl/flexi-streams | cl-qprint |
 | global-vars | github lmj/global-vars `c749f32` → OCI `1.0.0` | bordeaux-threads |
