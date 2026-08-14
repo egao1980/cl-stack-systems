@@ -78,6 +78,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
 | yason | github phmarek/yason `0c84b29` → OCI `0.8.3` | json-backend-yason alternate |
 | dexador | github fukamachi/dexador `f068b40` (asd **0.9.16**, no git tag) | http-backend-dexador; cl-repository-client HTTP |
+| winhttp | github fjames86/winhttp `8611ba5` (asd has no `:version`; force **0.1.0**) | dexador `(:feature :windows "winhttp")` |
 | fast-http | github fukamachi/fast-http `03d440d` → OCI `0.3.0` | dexador |
 | fast-io | github rpav/fast-io `a4c5ad6` → OCI `1.0` | dexador |
 | trivial-mimes | git codeberg.org/shinmera/trivial-mimes `8b1ea12` → OCI `1.1.0` (GitHub archived) | dexador |
