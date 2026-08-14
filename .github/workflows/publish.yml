@@ -91,13 +91,23 @@ jobs:
 
       - name: Pull cl-repository-packager
         run: |
-          CL_REPO_IMAGE="ghcr.io/egao1980/cl-repository/cl-repository-packager"
-          rm -rf /tmp/cl-repo-pull
-          mkdir -p /tmp/cl-repo-pull ~/.local/share/cl-systems
-          oras pull "${CL_REPO_IMAGE}:${PACKAGER_TAG}" -o /tmp/cl-repo-pull/
-          for f in /tmp/cl-repo-pull/*.tar.gz; do
-            tar -xzf "$f" -C ~/.local/share/cl-systems/
-          done
+          # Packager ≥0.16 cl-oci-client depends on first-party HTTP (not on QL).
+          # Extract into the same ASDF tree so ql:quickload can see them.
+          # dexador stays a QL seed until this repo publishes it to cl-systems.
+          DEST="$HOME/.local/share/cl-systems"
+          extract_oci() {
+            local ref="$1"
+            rm -rf /tmp/cl-repo-pull
+            mkdir -p /tmp/cl-repo-pull "$DEST"
+            oras pull "$ref" -o /tmp/cl-repo-pull/
+            for f in /tmp/cl-repo-pull/*.tar.gz; do
+              tar -xzf "$f" -C "$DEST/"
+            done
+          }
+          extract_oci "ghcr.io/egao1980/cl-repository/cl-repository-packager:${PACKAGER_TAG}"
+          extract_oci "ghcr.io/egao1980/cl-systems/http-protocol:0.3.0"
+          extract_oci "ghcr.io/egao1980/cl-systems/http-encoding-chipz:0.1.0"
+          extract_oci "ghcr.io/egao1980/cl-systems/http-backend-dexador:0.1.2"
 
       - name: Publish import
         env:
