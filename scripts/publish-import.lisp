@@ -21,44 +21,13 @@
 (defun env (name &optional default)
   (or (uiop:getenv name) default))
 
-;;; Packager 0.8.0 workarounds (until newer packager OCI tag):
-;;; - normalize-dep crashes on (:feature (:and …) dep)
+;;; Packager 0.16.0 workarounds:
 ;;; - discover-provided-systems uses *read-eval* nil → #. in .asd yields no systems
 ;;; - resolve-system-name errors even when PKG_SYSTEM is explicit
-
-(defun feature-expr-p (expr)
-  (cond
-    ((null expr) t)
-    ((eq expr t) t)
-    ((symbolp expr) (and (member expr *features* :test #'eq) t))
-    ((and (consp expr) (eq (first expr) :and))
-     (every #'feature-expr-p (rest expr)))
-    ((and (consp expr) (eq (first expr) :or))
-     (some #'feature-expr-p (rest expr)))
-    ((and (consp expr) (eq (first expr) :not) (rest expr))
-     (not (feature-expr-p (second expr))))
-    (t nil)))
-
-(defun normalize-dep* (dep)
-  (cond
-    ((null dep) nil)
-    ((stringp dep) (string-downcase dep))
-    ((and (symbolp dep) (not (null dep)))
-     (string-downcase (symbol-name dep)))
-    ((and (consp dep) (eq (first dep) :version) (>= (length dep) 3))
-     (let ((name (normalize-dep* (second dep))))
-       (when name (cons name (string (third dep))))))
-    ((and (consp dep) (eq (first dep) :feature) (>= (length dep) 3))
-     (when (feature-expr-p (second dep))
-       (normalize-dep* (third dep))))
-    ((and (consp dep) (member (first dep) '(:require :feature) :test #'eq))
-     nil)
-    ((consp dep)
-     (normalize-dep* (or (find-if #'stringp dep)
-                         (find-if (lambda (x) (and (symbolp x) x (not (keywordp x)))) dep)
-                         (third dep)
-                         (second dep))))
-    (t nil)))
+;;; OCI depends-on is install metadata for every consumer OS. Do NOT filter
+;;; (:feature …) against the *publish host* *features* — Linux CI would drop
+;;; (:feature :windows "winhttp") from dexador (and keep Linux-only cl+ssl).
+(load (merge-pathnames "normalize-dep.lisp" (or *load-pathname* *compile-file-pathname*)))
 
 (setf (fdefinition 'cl-repository-packager/asdf-plugin:normalize-dep)
       #'normalize-dep*)
