@@ -389,11 +389,10 @@ Consumers may QL-fallback until those imports land.~%"
         (when (stringp name) name))))
 
 (defun build-spec-from-source (source-dir system-name source-url revision)
-  "Spec only — mirror of packager build-package-from-source minus the build.
-   Version overrides must land on the spec BEFORE build-package runs, or the
-   tarball prefix, config blob, and OCI annotations keep the .asd version
-   while only the tag gets the forced one (cl-unicode 0.1.7 shipped a
-   cl-unicode-0.1.6/ tarball this way)."
+  "Spec only — then APPLY-OCI-VERSION + BUILD-PACKAGE.
+   Packager ≥0.15.0 also accepts `:version` on BUILD-PACKAGE-FROM-SOURCE;
+   we still split here so PKG_VERSION / imports/*/version / pin coalesce
+   via APPLY-OCI-VERSION before the build (same fix as cl-stack#174)."
   (let ((resolved (cl-repository-packager/source-adapter::resolve-system-name
                    source-dir system-name)))
     (asdf:initialize-source-registry
