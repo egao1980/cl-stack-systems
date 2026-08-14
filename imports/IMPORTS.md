@@ -77,6 +77,13 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2, yason |
 | trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
 | yason | github phmarek/yason `0c84b29` → OCI `0.8.3` | json-backend-yason alternate |
+| dexador | github fukamachi/dexador `f068b40` (asd **0.9.16**, no git tag) | http-backend-dexador; cl-repository-client HTTP |
+| fast-http | github fukamachi/fast-http `03d440d` → OCI `0.3.0` | dexador |
+| fast-io | github rpav/fast-io `a4c5ad6` → OCI `1.0` | dexador |
+| trivial-mimes | git codeberg.org/shinmera/trivial-mimes `8b1ea12` → OCI `1.1.0` (GitHub archived) | dexador |
+| xsubseq | github fukamachi/xsubseq `5ce430b` → OCI `0.1` | fast-http, smart-buffer |
+| smart-buffer | github fukamachi/smart-buffer `619759d` → OCI `0.1` | fast-http |
+| static-vectors | github sionescu/static-vectors `v1.9.3` → OCI `1.9.3` | fast-io (`#+fast-io-sv`, SBCL) |
 | dbi / cl-dbi / dbd-sqlite3 / dbd-postgres | github fukamachi/cl-dbi `2f4f8b4` → OCI `0.11.1` (dbd-* revision-tagged) | [`sql-protocol`](https://github.com/egao1980/sql-protocol) connectivity |
 | sqlite | github TeMPOraL/cl-sqlite `0.2.1` → OCI `0.2.1` | dbd-sqlite3 |
 | iterate | git gitlab.common-lisp.net/iterate/iterate `d27d7ff` → OCI `1.6.0` | sqlite, trivia.balland2006 |
@@ -104,10 +111,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cl-stack-ssl, cl-stack-brotli, cl-stack-zstd, event-backend-* | **native overlays** — own publish via cl-repository reusable workflow |
 | cl-mcp, cl-repository | tooling; not `cl-systems` library pins |
 
-## Deferred (dexador wave / cl+ssl transitive)
-
-dexador, fast-http, trivial-mimes — add when http-protocol sync backend
-lands or when cl+ssl publish needs them explicitly.
+## Deferred
 
 Natives for SQL (libsqlite3 / libpq) — system packages in CI until overlays.
 
