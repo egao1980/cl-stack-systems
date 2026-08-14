@@ -390,7 +390,7 @@ Consumers may QL-fallback until those imports land.~%"
 
 (defun build-spec-from-source (source-dir system-name source-url revision)
   "Spec only — then APPLY-OCI-VERSION + BUILD-PACKAGE.
-   Packager ≥0.15.0 also accepts `:version` on BUILD-PACKAGE-FROM-SOURCE;
+   Packager ≥0.16.0 also accepts `:version` on BUILD-PACKAGE-FROM-SOURCE;
    we still split here so PKG_VERSION / imports/*/version / pin coalesce
    via APPLY-OCI-VERSION before the build (same fix as cl-stack#174)."
   (let ((resolved (cl-repository-packager/source-adapter::resolve-system-name
