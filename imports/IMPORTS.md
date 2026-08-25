@@ -42,7 +42,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | hunchentoot | github edicl/hunchentoot `v1.3.1` → OCI `1.3.1` | http-server default (Windows+) |
 | ironclad | github sharplispers/ironclad `v0.61` → OCI `0.61` | lack-util |
 | lack | github fukamachi/lack `35d8b0a` → OCI `0.3.0` | Clack middleware builder |
-| log4cl | github sharplispers/log4cl `v1.1.2` | log-backend-log4cl |
+| log4cl | github sharplispers/log4cl `fe3da517` → OCI `1.1.4` (SBCL 2.6+ `lambda-parent`) | log-backend-log4cl |
 | lack-component | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | lack |
 | lack-middleware-backtrace | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | clack |
 | lack-util | github fukamachi/lack `35d8b0a` → OCI `0.2.0` | lack / clack |
