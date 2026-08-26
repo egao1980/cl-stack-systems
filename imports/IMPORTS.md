@@ -31,6 +31,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | blackbird | github orthecreedence/blackbird `1ec17c5` | http-protocol, ws-protocol |
 | bordeaux-threads | github sionescu/bordeaux-threads `v0.9.4` → OCI `0.9.4` (bt2 API) | concurrency default (#95); global-vars + trivial-garbage |
 | cffi | github cffi/cffi `v0.24.1` → OCI `0.24.1` (asd has no `:version`; publish forces pin) | event-backend-*, cl-stack-brotli/zstd, http-backend-winhttp |
+| cffi-grovel | github cffi/cffi `v0.24.1` → OCI `0.24.1` | cl-stack-icu / Woo grovel; same pin as `cffi` |
 | chipz | github sharplispers/chipz | http-protocol |
 | cl-cookie | github fukamachi/cl-cookie `355f9c1` | http-protocol |
 | chunga | github edicl/chunga `v1.1.9` → OCI `1.1.9` | hunchentoot |
@@ -77,6 +78,10 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2, yason |
 | trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
 | yason | github phmarek/yason `0c84b29` → OCI `0.8.3` | json-backend-yason alternate |
+| event-emitter | github fukamachi/event-emitter `d8bd3d9` → OCI `0.0.1` | websocket-driver-base |
+| fast-websocket | github fukamachi/fast-websocket `66ea866` → OCI `0.1` | websocket-driver |
+| sha1 | github massung/SHA1 `be8b1b1` → OCI `1.0` | websocket-driver-base |
+| websocket-driver / websocket-driver-base / websocket-driver-client / websocket-driver-server | github fukamachi/websocket-driver `137e313` → OCI `0.2.0` | [`ws-protocol`](https://github.com/egao1980/ws-protocol) driver + cl-stack-demos |
 | dexador | github fukamachi/dexador `f068b40` (asd **0.9.16**, no git tag) | http-backend-dexador; cl-repository-client HTTP |
 | winhttp | github fjames86/winhttp `8611ba5` (asd has no `:version`; force **0.1.0**) | dexador `(:feature :windows "winhttp")` |
 | fast-http | github fukamachi/fast-http `03d440d` → OCI `0.3.0` | dexador |

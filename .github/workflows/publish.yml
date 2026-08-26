@@ -2,6 +2,11 @@ name: Publish imports
 
 # Discover imports/*/qlfile and publish each in an isolated matrix job
 # → ghcr.io/egao1980/cl-systems/<system>:<version>
+#
+# Push to main publishes only changed import dirs. Full matrix is explicit:
+#   gh workflow run publish.yml -R egao1980/cl-stack-systems
+# Single import:
+#   gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 on:
   push:
     branches: [main]
@@ -34,11 +39,16 @@ jobs:
       imports: ${{ steps.list.outputs.imports }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - id: list
         shell: bash
         run: |
           set -euo pipefail
+          # workflow_dispatch + import=NAME → that one only.
+          # workflow_dispatch with empty import → all (explicit full republish).
+          # push to main → only import dirs that changed (never the full matrix).
           if [ -n "${{ inputs.import }}" ]; then
             NAME="${{ inputs.import }}"
             if [ ! -f "imports/${NAME}/qlfile" ]; then
@@ -46,6 +56,21 @@ jobs:
               exit 1
             fi
             jq -cn --arg i "$NAME" '[$i]' > /tmp/imports.json
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            BEFORE="${{ github.event.before }}"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              echo "No usable before SHA; refusing full-matrix publish on push" >&2
+              echo '[]' > /tmp/imports.json
+            else
+              git diff --name-only "$BEFORE" "$GITHUB_SHA" \
+                | sed -n 's|^imports/\([^/]*\)/.*|\1|p' \
+                | sort -u \
+                | while read -r n; do
+                    [ -f "imports/${n}/qlfile" ] && printf '%s\n' "$n"
+                  done \
+                | jq -R -s -c 'split("\n") | map(select(length>0))' \
+                > /tmp/imports.json
+            fi
           else
             find imports -mindepth 2 -maxdepth 2 -name qlfile -type f \
               | sed 's|^imports/||; s|/qlfile$||' \
