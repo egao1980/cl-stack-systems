@@ -30,7 +30,7 @@ on:
         default: "false"
 
 env:
-  PACKAGER_TAG: "0.16.0"
+  PACKAGER_TAG: "latest"
 
 jobs:
   discover:
