@@ -30,7 +30,9 @@ on:
         default: "false"
 
 env:
-  PACKAGER_TAG: "latest"
+  # :latest is a system-name alias (empty layers, alias-for cl-oci-client).
+  # `oras pull …:latest` therefore writes no tarball. Pin the packager semver.
+  PACKAGER_TAG: "0.18.0"
 
 jobs:
   discover:
@@ -125,7 +127,14 @@ jobs:
             rm -rf /tmp/cl-repo-pull
             mkdir -p /tmp/cl-repo-pull "$DEST"
             oras pull "$ref" -o /tmp/cl-repo-pull/
-            for f in /tmp/cl-repo-pull/*.tar.gz; do
+            shopt -s nullglob
+            local tarballs=(/tmp/cl-repo-pull/*.tar.gz)
+            if ((${#tarballs[@]} == 0)); then
+              echo "::error::No .tar.gz from $ref — :latest is a system-name alias with empty layers. Pin a semver tag."
+              ls -la /tmp/cl-repo-pull || true
+              exit 1
+            fi
+            for f in "${tarballs[@]}"; do
               tar -xzf "$f" -C "$DEST/"
             done
           }
