@@ -108,6 +108,10 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-with-current-source-form | github scymtym/trivial-with-current-source-form `d00f7ab` | esrap |
 | uuid | github dardoria/uuid `f0052f3` → OCI `2012.12.26` | mito-core |
 | trivial-utf-8 | git gitlab.common-lisp.net/trivial-utf-8 `3cd943e` (pre-mgl-pax) → **OCI `0.1.0` published** | uuid; pin avoids mgl-pax-bootstrap |
+| tuition | github atgreen/cl-tuition `v2.3.0` | [`ag-ui-backend-tui`](https://github.com/egao1980/ag-ui-backend-tui) (TEA TUI) |
+| version-string | github atgreen/cl-version-string `v1.0.1` | tuition |
+| trivial-channels | github rpav/trivial-channels `e237011` | tuition |
+| serapeum | github ruricolist/serapeum `ff930b6` | tuition |
 
 ## Intentionally not here
 
