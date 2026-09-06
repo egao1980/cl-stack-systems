@@ -87,7 +87,16 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | sha1 | github massung/SHA1 `be8b1b1` → OCI `1.0` | websocket-driver-base |
 | websocket-driver / websocket-driver-base / websocket-driver-client / websocket-driver-server | github fukamachi/websocket-driver `137e313` → OCI `0.2.0` | [`ws-backend-websocket-driver`](https://github.com/egao1980/ws-backend-websocket-driver) + cl-stack-demos |
 | prove / prove-asdf | github fukamachi/prove `5d71f02` → OCI **1.0.0** | quri-test (`prove-asdf` is a defsystem-depends-on) |
-| http2 | github egao1980/http2 `827bfc7` → OCI **2.1.1** (patched zellerin; threaded TLS is cl+ssl, no openssl grovel) | H2 client (`http2/client`) + Lisp accept (`http2/server/threaded`). CI `:with` is the **package** `http2` — not `http2/client`. Transitives `mgl-pax` / `anaphora` / `gzip-stream` / `puri` QL-fallback until imported. |
+| http2 | github egao1980/http2 `827bfc7` → OCI **2.1.1** (patched zellerin; threaded TLS is cl+ssl, no openssl grovel) | H2 client (`http2/client`) + Lisp accept (`http2/server/threaded`). CI `:with` is the **package** `http2` — not `http2/client`. |
+| anaphora | github spwhitton/anaphora `0.9.8` → OCI **0.9.8** | http2/core |
+| puri | github sharplispers/puri `4bbab89` → OCI **1.5.7** (asd has no `:version`) | http2/client + http2/server/shared |
+| gzip-stream | github mcna/gzip-stream `80b9a5e` → OCI **0.2.8** | http2 payload gzip (salza2 already imported) |
+| named-readtables | github melisgl/named-readtables `9b774b5` → OCI **0.9** | mgl-pax / dref |
+| pythonic-string-reader | github smithzvk/pythonic-string-reader `47a70ba` → OCI **1.0.0** (asd has no `:version`) | dref |
+| autoload | github melisgl/autoload `452ccdf` → OCI **0.1.0** | mgl-pax / dref `defsystem-depends-on` |
+| mgl-pax-bootstrap | github melisgl/mgl-pax `d91517c` → OCI **0.5** (`system` file; same pin as mgl-pax) | autoload + named-readtables + dref |
+| mgl-pax | github melisgl/mgl-pax `d91517c` → OCI **0.5** | http2/core docs macros (`define-package` / `defsection`). Base system only — do not depend on `mgl-pax/document`. |
+| dref | github melisgl/dref `8c85a95` → OCI **0.5.0** | mgl-pax |
 | dexador | github fukamachi/dexador `f068b40` (asd **0.9.16**, no git tag) | http-backend-dexador; cl-repository-client HTTP |
 | winhttp | github fjames86/winhttp `8611ba5` (asd has no `:version`; force **0.1.0**) | dexador `(:feature :windows "winhttp")` |
 | fast-http | github fukamachi/fast-http `03d440d` → OCI `0.3.0` | dexador |
@@ -127,4 +136,4 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 
 Natives for SQL (libsqlite3 / libpq) — system packages in CI until overlays.
 
-`mgl-pax` / full doc tooling — not imported; `trivial-utf-8` pinned to pre-bootstrap commit.
+`trivial-utf-8` stays pinned to the pre-bootstrap commit (do not upgrade it onto `mgl-pax-bootstrap`). Base `mgl-pax` / `dref` are imported for http2; do **not** import `mgl-pax/document` / navigate / web.
