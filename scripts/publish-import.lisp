@@ -12,14 +12,27 @@
 
 (require :asdf)
 (sb-ext:disable-debugger)
-;; dref / mgl-pax use :class autoload:autoload-system. Load it if the
-;; previous workflow step installed the OCI package onto disk.
-(ignore-errors (asdf:load-system "autoload"))
 (asdf:initialize-source-registry
  '(:source-registry
-   (:tree (:home ".local/share/cl-systems/"))
    (:tree (:home ".local/share/cl-repository/systems/"))
+   (:tree (:home ".local/share/cl-systems/"))
    :inherit-configuration))
+
+(defun forget-asdf-system (name)
+  "Drop a registered system so a later tree (OCI) can win over Quicklisp."
+  (asdf:clear-system name)
+  (let ((table (ignore-errors
+                 (symbol-value (find-symbol "*REGISTERED-SYSTEMS*" :asdf/system-registry)))))
+    (when (hash-table-p table)
+      (remhash (string-downcase name) table)
+      (remhash (asdf:primary-system-name name) table))))
+
+;; QL mgl-pax ships a different AUTOLOAD that is not AUTOLOAD:AUTOLOAD-SYSTEM.
+(let ((sys (asdf:find-system "autoload" nil)))
+  (when sys
+    (format t "~&; evicting ASDF autoload from ~a~%"
+            (ignore-errors (namestring (asdf:system-source-directory sys))))
+    (forget-asdf-system "autoload")))
 (asdf:load-system "cl-repository-packager")
 (asdf:load-system "cl-oci-client")
 
