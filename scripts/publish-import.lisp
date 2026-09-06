@@ -11,9 +11,14 @@
 ;;;   DEPS_DIST_URL     Quicklisp dist URL for ql-export fallback
 
 (require :asdf)
+(sb-ext:disable-debugger)
+;; dref / mgl-pax use :class autoload:autoload-system. Load it if the
+;; previous workflow step installed the OCI package onto disk.
+(ignore-errors (asdf:load-system "autoload"))
 (asdf:initialize-source-registry
  '(:source-registry
    (:tree (:home ".local/share/cl-systems/"))
+   (:tree (:home ".local/share/cl-repository/systems/"))
    :inherit-configuration))
 (asdf:load-system "cl-repository-packager")
 (asdf:load-system "cl-oci-client")
@@ -176,9 +181,12 @@
                 spec)
             (error (e)
               (format t "~&auto-package-spec failed (~a); using manual fallback~%" e)
-              (manual-package-spec
-               system-name
-               (asdf:system-source-directory (asdf:find-system system-name))))))))
+              (let ((sys (asdf:find-system system-name nil)))
+                (unless sys
+                  (error "auto-package-spec failed and ~a is not loadable: ~a" system-name e))
+                (manual-package-spec
+                 system-name
+                 (asdf:system-source-directory sys))))))))
 
 (defun strip-comment (line)
   (let ((pos (position #\# line)))

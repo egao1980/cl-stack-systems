@@ -119,6 +119,8 @@ jobs:
               -e '(cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems" :priority :append)' \
               -e "(cl-repo:ensure-systems \"cl-repository-packager\" :version \"${PACKAGER_TAG}\" :default-source :oci)" \
               -e '(cl-repo:ensure-systems "cl-oci-client" :default-source :oci)' \
+              -e '(ignore-errors (cl-repo:ensure-systems "autoload" :default-source :oci))' \
+              -e '(ignore-errors (cl-repo:ensure-systems "mgl-pax-bootstrap" :default-source :oci))' \
               -q
 
       - name: Publish import
@@ -132,4 +134,4 @@ jobs:
           PUBLISH_QL_DEPS: ${{ inputs.publish_ql_deps || 'false' }}
         run: |
           echo "=== $(cat "$PKG_QLFILE") ==="
-          ros -l scripts/publish-import.lisp -q
+          ros -e "(sb-ext:disable-debugger)" -l scripts/publish-import.lisp -q
