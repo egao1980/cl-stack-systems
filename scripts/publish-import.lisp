@@ -15,8 +15,11 @@
  '(:source-registry
    (:tree (:home ".local/share/cl-systems/"))
    :inherit-configuration))
-(load (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname)))
-(ql:quickload '(:cl-repository-packager :cl-oci-client) :silent t)
+(unless (asdf:find-system "cl-repository-packager" nil)
+  (load (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname)))
+  (ql:quickload '(:cl-repository-packager :cl-oci-client) :silent t))
+(asdf:load-system "cl-repository-packager")
+(asdf:load-system "cl-oci-client")
 
 (defun env (name &optional default)
   (or (uiop:getenv name) default))
