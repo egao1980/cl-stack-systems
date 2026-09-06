@@ -357,6 +357,50 @@ Consumers may QL-fallback until those imports land.~%"
              (name (first (last (pathname-directory dir)))))
         (when (stringp name) name))))
 
+(defun provided-system-p (name provided)
+  (member (string-downcase (string name)) provided :test #'string=))
+
+(defun flatten-external-depends-on (root-name provided)
+  "Walk ASDF depends-on from ROOT-NAME. Recurse into PROVIDED (same-tarball
+   secondaries such as http2/client); collect everything else. Without this,
+   auto-package-spec on an umbrella system advertises secondaries as if they
+   were registry packages."
+  (let ((provided (mapcar (lambda (s) (string-downcase (string s))) provided))
+        (seen (make-hash-table :test #'equal))
+        (out nil))
+    (labels ((walk (name)
+               (let ((key (string-downcase (string name))))
+                 (when (gethash key seen)
+                   (return-from walk))
+                 (setf (gethash key seen) t)
+                 (let ((sys (asdf:find-system key nil)))
+                   (unless sys
+                     (return-from walk))
+                   (dolist (raw (asdf:system-depends-on sys))
+                     (let ((norm (normalize-dep* raw)))
+                       (when norm
+                         (let ((dn (if (consp norm) (car norm) norm)))
+                           (if (provided-system-p dn provided)
+                               (walk dn)
+                               (pushnew norm out :test #'equal))))))))))
+      (walk root-name)
+      (nreverse out))))
+
+(defun rewrite-same-tarball-depends (spec source-dir resolved)
+  "Replace umbrella → secondary depends-on with flattened external deps."
+  (let* ((provides (or (cl-repository-packager/build-matrix:package-spec-provides spec)
+                       (discover-provided-systems* source-dir)
+                       (list resolved)))
+         (external (flatten-external-depends-on resolved provides)))
+    (when (or external
+              (find-if (lambda (dep)
+                         (let ((n (if (consp dep) (car dep) dep)))
+                           (and n (provided-system-p n provides))))
+                       (cl-repository-packager/build-matrix:package-spec-depends-on spec)))
+      (format t "~&; oci: flattened depends-on → ~s~%" external)
+      (setf (cl-repository-packager/build-matrix:package-spec-depends-on spec) external)))
+  spec)
+
 (defun build-spec-from-source (source-dir system-name source-url revision)
   "Spec only — then APPLY-OCI-VERSION + BUILD-PACKAGE.
    Packager ≥0.16.0 also accepts `:version` on BUILD-PACKAGE-FROM-SOURCE;
@@ -368,6 +412,7 @@ Consumers may QL-fallback until those imports land.~%"
      `(:source-registry (:tree ,(namestring source-dir)) :inherit-configuration))
     (asdf:clear-system resolved)
     (let ((spec (cl-repository-packager/asdf-plugin:auto-package-spec resolved)))
+      (rewrite-same-tarball-depends spec source-dir resolved)
       (setf (cl-repository-packager/build-matrix:package-spec-source-url spec) source-url)
       (setf (cl-repository-packager/build-matrix:package-spec-revision spec) revision)
       spec)))
