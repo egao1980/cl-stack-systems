@@ -85,7 +85,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | event-emitter | github fukamachi/event-emitter `d8bd3d9` → OCI `0.0.1` | websocket-driver-base |
 | fast-websocket | github fukamachi/fast-websocket `66ea866` → OCI `0.1` | websocket-driver |
 | sha1 | github massung/SHA1 `be8b1b1` → OCI `1.0` | websocket-driver-base |
-| websocket-driver / websocket-driver-base / websocket-driver-client / websocket-driver-server | github fukamachi/websocket-driver `137e313` → OCI `0.2.0` | [`ws-backend-websocket-driver`](https://github.com/egao1980/ws-backend-websocket-driver) + cl-stack-demos |
+| websocket-driver / websocket-driver-base / websocket-driver-client / websocket-driver-server | github egao1980/websocket-driver `d93dba0` → OCI **0.2.1** (fukamachi + unmerged #74: no SSL_CTX auto-free, idempotent close) | [`ws-backend-websocket-driver`](https://github.com/egao1980/ws-backend-websocket-driver) + cl-stack-demos |
 | prove / prove-asdf | github fukamachi/prove `5d71f02` → OCI **1.0.0** | quri-test (`prove-asdf` is a defsystem-depends-on) |
 | http2 | github egao1980/http2 `827bfc7` → OCI **2.1.1** (patched zellerin; threaded TLS is cl+ssl, no openssl grovel) | H2 client (`http2/client`) + Lisp accept (`http2/server/threaded`). CI `:with` is the **package** `http2` — not `http2/client`. |
 | anaphora | github spwhitton/anaphora `0.9.8` → OCI **0.9.8** | http2/core |
