@@ -295,9 +295,9 @@
   (let ((sys (asdf:find-system "autoload" nil)))
     (when (or (null sys) (autoload-from-quicklisp-p sys))
       (asdf:load-system "cl-repository-client")
-      (cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems"
-                            :priority :append)
-      (cl-repo:ensure-systems "autoload" :default-source :oci)
+      (uiop:symbol-call :cl-repo :add-registry "https://ghcr.io"
+                        :namespace "egao1980/cl-systems" :priority :append)
+      (uiop:symbol-call :cl-repo :ensure-systems "autoload" :default-source :oci)
       (forget-asdf-system "autoload")
       (setf sys (asdf:find-system "autoload" t))))
   (let ((sys (asdf:find-system "autoload" t)))
