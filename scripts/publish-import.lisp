@@ -155,7 +155,8 @@
   (setf (bm-slot spec "DESCRIPTION") (oci-annotation-string (bm-slot spec "DESCRIPTION")))
   (let ((provides (bm-slot spec "PROVIDES")))
     (when provides
-      (setf (bm-slot spec "PROVIDES") (remove-if #'test-system-name-p provides))))
+      (setf (bm-slot spec "PROVIDES")
+            (remove-if #'test-system-name-p (restrict-import-provides provides)))))
   (funcall (get 'make-annotations* 'orig) spec))
 
 (let ((make-ann (bm-sym "MAKE-ANNOTATIONS")))
@@ -250,16 +251,145 @@
 (defvar *oci-package-name* nil
   "Preferred OCI package name (import directory), overriding ASDF system name.")
 
+(defvar *oci-provides* nil
+  "When set (imports/<name>/provides), replace discovered provides.
+   Stops one git tree from dual-providing a sibling import (mgl-pax vs bootstrap).")
+
+(defun ql-dummy-autoload-directories ()
+  "Quicklisp mgl-pax dist ships autoload/ that is not AUTOLOAD:AUTOLOAD-SYSTEM."
+  (let ((homes (remove-duplicates
+                (remove nil (list (uiop:getenv "HOME")
+                                  (ignore-errors (namestring (user-homedir-pathname)))
+                                  "/root"
+                                  "/github/home"))
+                :test #'string=))
+        (dirs nil))
+    (dolist (home homes)
+      (dolist (rel '(".roswell/lisp/quicklisp/dists/quicklisp/software/"
+                     "quicklisp/dists/quicklisp/software/"))
+        (let ((software (merge-pathnames rel (uiop:ensure-directory-pathname home))))
+          (dolist (dir (directory (merge-pathnames "mgl-pax-*/autoload/" software)))
+            (push dir dirs)))))
+    (nreverse dirs)))
+
+(defun evict-ql-dummy-autoload ()
+  (dolist (dir (ql-dummy-autoload-directories))
+    (format t "~&; deleting dummy QL autoload ~a~%" dir)
+    (uiop:delete-directory-tree (uiop:ensure-directory-pathname dir)
+                                :validate (constantly t)
+                                :if-does-not-exist :ignore))
+  (forget-asdf-system "autoload"))
+
+(defun autoload-from-quicklisp-p (sys)
+  (let ((src (ignore-errors (namestring (asdf:system-source-directory sys)))))
+    (and src (search "quicklisp" src :test #'char-equal))))
+
+(defun ensure-real-autoload ()
+  "dref.asd / mgl-pax.asd need AUTOLOAD:AUTOLOAD-SYSTEM from the OCI package."
+  (evict-ql-dummy-autoload)
+  (asdf:clear-source-registry)
+  (asdf:initialize-source-registry
+   '(:source-registry
+     (:tree (:home ".local/share/cl-repository/systems/"))
+     (:tree (:home ".local/share/cl-systems/"))
+     :inherit-configuration))
+  (let ((sys (asdf:find-system "autoload" nil)))
+    (when (or (null sys) (autoload-from-quicklisp-p sys))
+      (asdf:load-system "cl-repository-client")
+      (uiop:symbol-call :cl-repo :add-registry "https://ghcr.io"
+                        :namespace "egao1980/cl-systems" :priority :append)
+      (uiop:symbol-call :cl-repo :ensure-systems "autoload" :default-source :oci)
+      (forget-asdf-system "autoload")
+      (setf sys (asdf:find-system "autoload" t))))
+  (let ((sys (asdf:find-system "autoload" t)))
+    (when (autoload-from-quicklisp-p sys)
+      (error "autoload still resolving to Quicklisp dummy: ~a"
+             (asdf:system-source-directory sys)))
+    (asdf:load-system "autoload")
+    (unless (and (find-package "AUTOLOAD")
+                 (find-symbol "AUTOLOAD-SYSTEM" "AUTOLOAD"))
+      (error "loaded autoload from ~a but AUTOLOAD:AUTOLOAD-SYSTEM is missing"
+             (asdf:system-source-directory sys)))
+    (format t "~&; using autoload from ~a~%"
+            (asdf:system-source-directory sys))))
+
+(defun copy-directory-tree (from to)
+  (let ((from (uiop:ensure-directory-pathname from))
+        (to (uiop:ensure-directory-pathname to)))
+    (ensure-directories-exist to)
+    (dolist (p (directory (merge-pathnames uiop:*wild-file* from)))
+      (let ((name (or (file-namestring p)
+                      (first (last (pathname-directory p))))))
+        (cond
+          ((or (null name) (string= name "") (string= name ".") (string= name "..")))
+          ((uiop:directory-pathname-p p)
+           (copy-directory-tree p (merge-pathnames
+                                   (make-pathname :directory (list :relative name))
+                                   to)))
+          (t
+           (uiop:copy-file p (merge-pathnames name to))))))))
+
+(defun stage-mgl-pax-bootstrap (source-dir)
+  "Pack only bootstrap asd + src/bootstrap/. The full mgl-pax clone also
+   contains mgl-pax.asd, which is unloadable without autoload:autoload-system
+   and dual-provides the mgl-pax import."
+  (let* ((src (uiop:ensure-directory-pathname source-dir))
+         (asd (merge-pathnames "mgl-pax-bootstrap.asd" src))
+         (boot (merge-pathnames "src/bootstrap/" src))
+         (dst (uiop:ensure-directory-pathname
+               (merge-pathnames "mgl-pax-bootstrap-only/"
+                                (uiop:temporary-directory)))))
+    (unless (probe-file asd)
+      (error "mgl-pax-bootstrap.asd missing under ~a" src))
+    (unless (probe-file boot)
+      (error "src/bootstrap/ missing under ~a" src))
+    (when (probe-file dst)
+      (uiop:delete-directory-tree dst :validate (constantly t)))
+    (ensure-directories-exist dst)
+    (uiop:copy-file asd (merge-pathnames "mgl-pax-bootstrap.asd" dst))
+    (dolist (name '("COPYING" "README.md"))
+      (let ((from (merge-pathnames name src)))
+        (when (probe-file from)
+          (uiop:copy-file from (merge-pathnames name dst)))))
+    (copy-directory-tree boot (merge-pathnames "src/bootstrap/" dst))
+    (format t "~&; staged bootstrap-only tree ~a~%" dst)
+    dst))
+
+(defun maybe-stage-source (source-dir system-name)
+  (if (and (equal *oci-package-name* "mgl-pax-bootstrap")
+           (equal system-name "mgl-pax-bootstrap"))
+      (stage-mgl-pax-bootstrap source-dir)
+      source-dir))
+
+(defun sibling-provides-file (qlfile)
+  "Optional imports/<name>/provides — one system name per line."
+  (let ((path (merge-pathnames "provides" (uiop:pathname-directory-pathname qlfile))))
+    (when (probe-file path)
+      (loop for line in (uiop:read-file-lines path)
+            for s = (string-trim '(#\Space #\Tab #\Newline #\Return) line)
+            when (and (plusp (length s)) (char/= (char s 0) #\#))
+              collect (string-downcase s)))))
+
+(defun restrict-import-provides (provides)
+  (if *oci-provides*
+      (copy-list *oci-provides*)
+      (mapcar (lambda (s) (string-downcase (string s))) provides)))
+
 (defun ensure-oci-safe-spec (spec)
   "Use import-dir / sanitized name for OCI; drop '+' from provide aliases."
   (let* ((orig (cl-repository-packager/build-matrix:package-spec-name spec))
          (safe (or *oci-package-name* (oci-safe-name orig)))
-         (provides (cl-repository-packager/build-matrix:package-spec-provides spec)))
+         (provides (restrict-import-provides
+                    (cl-repository-packager/build-matrix:package-spec-provides spec))))
     (setf (cl-repository-packager/build-matrix:package-spec-name spec) safe)
     ;; Alias pushes also hit GHCR paths — never leave '+' in provide names.
+    ;; When imports/<name>/provides is set, do not re-add discovered extras.
     (setf (cl-repository-packager/build-matrix:package-spec-provides spec)
           (remove-duplicates
-           (mapcar #'oci-safe-name (append (list orig safe) provides))
+           (mapcar #'oci-safe-name
+                   (if *oci-provides*
+                       (append (list safe) provides)
+                       (append (list orig safe) provides)))
            :test #'string=))
     spec))
 
@@ -427,10 +557,19 @@ Consumers may QL-fallback until those imports land.~%"
    Packager ≥0.16.0 also accepts `:version` on BUILD-PACKAGE-FROM-SOURCE;
    we still split here so PKG_VERSION / imports/*/version / pin coalesce
    via APPLY-OCI-VERSION before the build (same fix as cl-stack#174)."
+  (when (member (or *oci-package-name* system-name) '("dref" "mgl-pax")
+                :test #'string=)
+    (ensure-real-autoload))
   (let ((resolved (cl-repository-packager/source-adapter::resolve-system-name
                    source-dir system-name)))
+    ;; Clone first so a previously extracted mgl-pax-bootstrap tarball cannot
+    ;; win find-system for mgl-pax. Keep OCI trees so autoload stays visible.
     (asdf:initialize-source-registry
-     `(:source-registry (:tree ,(namestring source-dir)) :inherit-configuration))
+     `(:source-registry
+       (:tree ,(namestring source-dir))
+       (:tree (:home ".local/share/cl-repository/systems/"))
+       (:tree (:home ".local/share/cl-systems/"))
+       :inherit-configuration))
     (asdf:clear-system resolved)
     (let ((spec (cl-repository-packager/asdf-plugin:auto-package-spec resolved)))
       (rewrite-same-tarball-depends spec source-dir resolved)
@@ -441,7 +580,8 @@ Consumers may QL-fallback until those imports land.~%"
 (defun publish-entry-from-source (reg namespace skip-catalog publish-ql-deps deps-dist-url
                                   registry-host source-dir revision
                                   &key system-name source-url pin version-file)
-  (let ((spec (build-spec-from-source source-dir system-name source-url revision)))
+  (let* ((packed (maybe-stage-source source-dir system-name))
+         (spec (build-spec-from-source packed system-name source-url revision)))
     (apply-oci-version spec :pin pin :env-version (env "PKG_VERSION")
                        :version-file version-file)
     (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
@@ -490,7 +630,8 @@ Consumers may QL-fallback until those imports land.~%"
           (or (env "PKG_OCI_NAME")
               (let* ((dir (uiop:pathname-directory-pathname qlfile))
                      (name (first (last (pathname-directory dir)))))
-                (when (stringp name) name)))))
+                (when (stringp name) name))))
+         (*oci-provides* (sibling-provides-file qlfile)))
     (when publish-ql-deps
       (ql:quickload :cl-repository-ql-exporter :silent t))
     (multiple-value-bind (reg registry-url)

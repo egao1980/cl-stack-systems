@@ -94,9 +94,9 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | named-readtables | github melisgl/named-readtables `9b774b5` → OCI **0.9** | mgl-pax / dref |
 | pythonic-string-reader | github smithzvk/pythonic-string-reader `47a70ba` → OCI **1.0.0** (asd has no `:version`) | dref |
 | autoload | github melisgl/autoload `452ccdf` → OCI **0.1.0** | mgl-pax / dref `defsystem-depends-on` |
-| mgl-pax-bootstrap | github melisgl/mgl-pax `d91517c` → OCI **0.5** (`system` file; same pin as mgl-pax) | autoload + named-readtables + dref |
-| mgl-pax | github melisgl/mgl-pax `d91517c` → OCI **0.5** | http2/core docs macros (`define-package` / `defsection`). Base system only — do not depend on `mgl-pax/document`. |
-| dref | github melisgl/dref `8c85a95` → OCI **0.5.0** | mgl-pax |
+| mgl-pax-bootstrap | github melisgl/mgl-pax `d91517c` → OCI **0.5** (`system` + `provides`; pack **bootstrap asd + src/bootstrap/ only**) | autoload + named-readtables + dref. Do not extra-with this package in consumer CI. |
+| mgl-pax | github melisgl/mgl-pax `d91517c` → OCI **0.5** (`provides` = `mgl-pax` only) | http2/core docs macros (`define-package` / `defsection`). Base system only — do not depend on `mgl-pax/document`. |
+| dref | github melisgl/dref `8c85a95` → OCI **0.5.0** (`provides` = `dref` only; not `dref/full`) | mgl-pax |
 | dexador | github fukamachi/dexador `f068b40` (asd **0.9.16**, no git tag) | http-backend-dexador; cl-repository-client HTTP |
 | winhttp | github fjames86/winhttp `8611ba5` (asd has no `:version`; force **0.1.0**) | dexador `(:feature :windows "winhttp")` |
 | fast-http | github fukamachi/fast-http `03d440d` → OCI `0.3.0` | dexador |
@@ -136,4 +136,4 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 
 Natives for SQL (libsqlite3 / libpq) — system packages in CI until overlays.
 
-`trivial-utf-8` stays pinned to the pre-bootstrap commit (do not upgrade it onto `mgl-pax-bootstrap`). Base `mgl-pax` / `dref` are imported for http2; do **not** import `mgl-pax/document` / navigate / web.
+`trivial-utf-8` stays pinned to the pre-bootstrap commit (do not upgrade it onto `mgl-pax-bootstrap`). Base `mgl-pax` / `dref` are imported for http2; do **not** import `mgl-pax/document` / navigate / web. The bootstrap package must not `provide` `mgl-pax` (same-repo dual-provide). Publish packs bootstrap sources only and wipes QL's dummy `autoload/` before packing `dref` / `mgl-pax`.
