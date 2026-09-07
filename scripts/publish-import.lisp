@@ -155,7 +155,8 @@
   (setf (bm-slot spec "DESCRIPTION") (oci-annotation-string (bm-slot spec "DESCRIPTION")))
   (let ((provides (bm-slot spec "PROVIDES")))
     (when provides
-      (setf (bm-slot spec "PROVIDES") (remove-if #'test-system-name-p provides))))
+      (setf (bm-slot spec "PROVIDES")
+            (remove-if #'test-system-name-p (restrict-import-provides provides)))))
   (funcall (get 'make-annotations* 'orig) spec))
 
 (let ((make-ann (bm-sym "MAKE-ANNOTATIONS")))
