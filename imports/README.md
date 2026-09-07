@@ -14,5 +14,6 @@ Optional sibling files:
 |------|---------|
 | `system` | ASDF system name when it differs from the directory (e.g. `cl-plus-ssl` → `cl+ssl`) |
 | `version` | Force OCI tag when the `.asd` omits `:version` (e.g. `trivial-utf-8`) |
+| `provides` | Replace discovered provides (one name per line). Use when one git tree would dual-provide a sibling import (`mgl-pax` vs `mgl-pax-bootstrap`). |
 
 Do **not** put unrelated libraries in the same qlfile — that defeats isolation.

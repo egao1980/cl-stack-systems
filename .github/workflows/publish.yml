@@ -110,6 +110,20 @@ jobs:
           sbcl-version: ${{ env.SBCL_VERSION }}
           roswell-version: ${{ env.ROSWELL_VERSION }}
 
+      - name: Evict Quicklisp dummy autoload
+        run: |
+          set -euo pipefail
+          # QL's mgl-pax dist ships autoload/ that is not autoload:autoload-system.
+          # ensure-systems then says "already available" and skips the OCI package.
+          shopt -s nullglob
+          for root in "${HOME}" /root /github/home; do
+            for dir in "${root}/.roswell/lisp/quicklisp/dists/quicklisp/software/mgl-pax-"*/autoload \
+                       "${root}/quicklisp/dists/quicklisp/software/mgl-pax-"*/autoload; do
+              echo "removing $dir"
+              rm -rf "$dir"
+            done
+          done
+
       - name: Ensure packager
         run: |
           set -euo pipefail
@@ -119,9 +133,17 @@ jobs:
               -e '(cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems" :priority :append)' \
               -e "(cl-repo:ensure-systems \"cl-repository-packager\" :version \"${PACKAGER_TAG}\" :default-source :oci)" \
               -e '(cl-repo:ensure-systems "cl-oci-client" :default-source :oci)' \
-              -e '(ignore-errors (cl-repo:ensure-systems "autoload" :default-source :oci))' \
-              -e '(ignore-errors (cl-repo:ensure-systems "mgl-pax-bootstrap" :default-source :oci))' \
               -q
+          # dref.asd / mgl-pax.asd :class autoload:autoload-system. Do not
+          # extra-with mgl-pax-bootstrap here — that tarball currently also
+          # contains unloadable mgl-pax.asd (dual-provide).
+          if [ "${{ matrix.import }}" = "dref" ] || [ "${{ matrix.import }}" = "mgl-pax" ]; then
+            ros -e "(sb-ext:disable-debugger)" \
+                -e '(asdf:load-system "cl-repository-client")' \
+                -e '(cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems" :priority :append)' \
+                -e '(cl-repo:ensure-systems "autoload" :default-source :oci)' \
+                -q
+          fi
 
       - name: Publish import
         env:
