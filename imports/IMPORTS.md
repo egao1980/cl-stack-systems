@@ -66,6 +66,8 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | closer-mop | git codeberg.org/pcostanza/closer-mop `f17d7fb` → OCI `1.0.0` | jzon / com.inuoe.jzon (GitHub upstream gone) |
 | com.inuoe.jzon | github Zulu-Inuoe/jzon `v1.1.4` / `99b19fb` → OCI `1.1.4` | [`json-protocol`](https://github.com/egao1980/json-protocol) default backend |
 | documentation-utils | git codeberg.org/shinmera/documentation-utils `cd5b506` → OCI `1.2.0` | float-features |
+| array-utils | git codeberg.org/shinmera/array-utils `16e108a` → OCI `1.3.0` | plump |
+| plump | git codeberg.org/shinmera/plump `45fb7ff` → OCI `2.0.0` | html-protocol |
 | float-features | git codeberg.org/shinmera/float-features `136a908` → OCI `1.1.0` | jzon (non-ECL) |
 | cl-base64 | github darabi/cl-base64 | cl-mime |
 | local-time | github dlowe-net/local-time `59d93f7` | cl-cookie |
