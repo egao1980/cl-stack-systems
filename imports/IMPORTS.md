@@ -61,7 +61,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | md5 | github pmai/md5 `906593f` → OCI `2.0.4` | hunchentoot |
 | rfc2388 | github jdz/rfc2388 `591bcf7` → OCI `1.5` | hunchentoot multipart |
 | trivial-backtrace | github gwkkwg/trivial-backtrace `7f90b4a` → OCI `1.1.0` | hunchentoot |
-| usocket | github usocket/usocket `v0.8.9` → OCI `0.8.9` | hunchentoot, clack |
+| usocket | github usocket/usocket `v0.8.9` → OCI `0.8.9` (no `iolib` / `sb-bsd-sockets` in OCI depends-on) | hunchentoot, clack |
 | woo | github fukamachi/woo `2ef0d22` → OCI `0.12.0` | http-server Unix backend |
 | closer-mop | git codeberg.org/pcostanza/closer-mop `f17d7fb` → OCI `1.0.0` | jzon / com.inuoe.jzon (GitHub upstream gone) |
 | com.inuoe.jzon | github Zulu-Inuoe/jzon `v1.1.4` / `99b19fb` → OCI `1.1.4` | [`json-protocol`](https://github.com/egao1980/json-protocol) default backend |
