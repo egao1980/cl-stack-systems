@@ -28,6 +28,12 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 |--------|--------|-----|
 | adopt | github sjl/adopt `v1.3.0` | cli-backend-adopt |
 | alexandria | git gitlab.common-lisp.net/alexandria/alexandria | quri |
+| serapeum | github ruricolist/serapeum `master` → OCI `0.1.0` (asd has no `:version`) | itertools/collections |
+| string-case | github pkhuong/string-case `master` → OCI `0.0.2` | serapeum |
+| parse-number | github sharplispers/parse-number `master` → OCI `1.8` | serapeum |
+| trivial-file-size | github ruricolist/trivial-file-size `master` → OCI `0.1.0` (asd has no `:version`) | serapeum |
+| trivial-macroexpand-all | github cbaggers/trivial-macroexpand-all `master` → OCI `0.1.0` (asd has no `:version`) | serapeum |
+| parse-declarations-1.0 | git gitlab.common-lisp.net/parse-declarations → OCI `1.0` (`system` file) | serapeum |
 | bobbin | github sjl/bobbin `v1.0.1` | clingon, adopt |
 | clingon | github dnaeon/clingon `v0.7.0` | cli-backend-clingon |
 | cl-reexport | github takagi/cl-reexport `03ad7a0` | clingon |
