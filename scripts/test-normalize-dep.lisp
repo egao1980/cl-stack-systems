@@ -17,6 +17,12 @@
       "cl+ssl")
 (check "windows flexi" (normalize-dep* '(:feature :windows "flexi-streams")) "flexi-streams")
 (check "require dropped" (normalize-dep* '(:require :sb-posix)) nil)
+(check "usocket-iolib dropped" (normalize-dep* '(:feature :usocket-iolib :iolib)) nil)
+(check "iolib name dropped" (normalize-dep* :iolib) nil)
+(check "sb-bsd-sockets dropped"
+       (normalize-dep* '(:feature (:and (:or :sbcl :ecl :clasp) (:not :usocket-iolib))
+                         :sb-bsd-sockets))
+       nil)
 
 (let* ((dexador-deps
         '("fast-http" "quri" "fast-io" "babel" "trivial-gray-streams" "trivial-garbage"
