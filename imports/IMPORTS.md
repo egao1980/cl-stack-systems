@@ -99,7 +99,10 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | anaphora | github spwhitton/anaphora `0.9.8` → OCI **0.9.8** | http2/core |
 | puri | github sharplispers/puri `4bbab89` → OCI **1.5.7** (asd has no `:version`) | http2/client + http2/server/shared |
 | gzip-stream | github mcna/gzip-stream `80b9a5e` → OCI **0.2.8** | http2 payload gzip (salza2 already imported) |
-| named-readtables | github melisgl/named-readtables `9b774b5` → OCI **0.9** | mgl-pax / dref |
+| named-readtables | github melisgl/named-readtables `9b774b5` → OCI **0.9** | mgl-pax / dref; fset (QL's 20250622 named-readtables fails on SBCL 2.6.5 — keep this pin) |
+| fset | github slburson/fset `v2.4.4` / `31f6ada` → OCI **2.4.4** (`fset2` package = CHAMP sets/maps; deps alexandria, named-readtables, misc-extensions, mt19937) | [`spec-protocol`](https://github.com/egao1980/spec-protocol) runtime values (functional sets/maps for simultaneous action updates) |
+| misc-extensions | github slburson/misc-extensions `v4.3.2` / `c35c739` → OCI **4.3.2** (fset needs ≥ 4.2.4) | fset |
+| mt19937 | git gitlab.common-lisp.net/nyxt/mt19937 `831284f` (tag `1.1`; no upstream git — Nyxt mirror of the common-lisp.net tarball) → OCI **1.1** | fset |
 | pythonic-string-reader | github smithzvk/pythonic-string-reader `47a70ba` → OCI **1.0.0** (asd has no `:version`) | dref |
 | autoload | github melisgl/autoload `452ccdf` → OCI **0.1.0** | mgl-pax / dref `defsystem-depends-on` |
 | mgl-pax-bootstrap | github melisgl/mgl-pax `d91517c` → OCI **0.5** (`system` + `provides`; pack **bootstrap asd + src/bootstrap/ only**) | autoload + named-readtables + dref. Do not extra-with this package in consumer CI. |
