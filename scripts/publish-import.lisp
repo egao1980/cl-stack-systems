@@ -12,10 +12,20 @@
 
 (require :asdf)
 (sb-ext:disable-debugger)
+
+(defun ci-image-registry-entries ()
+  "ci-base keeps the client and packager under CL_REPOSITORY_DEST.
+   ensure-systems reports them already available and does not copy them
+   into ~/.local/share, so a later process must scan that tree."
+  (let ((dest (uiop:getenv "CL_REPOSITORY_DEST")))
+    (when (and dest (plusp (length dest)))
+      (list (list :tree (uiop:ensure-directory-pathname dest))))))
+
 (asdf:initialize-source-registry
- '(:source-registry
+ `(:source-registry
    (:tree (:home ".local/share/cl-repository/systems/"))
    (:tree (:home ".local/share/cl-systems/"))
+   ,@(ci-image-registry-entries)
    :inherit-configuration))
 
 (defun forget-asdf-system (name)
@@ -289,9 +299,10 @@
   (evict-ql-dummy-autoload)
   (asdf:clear-source-registry)
   (asdf:initialize-source-registry
-   '(:source-registry
+   `(:source-registry
      (:tree (:home ".local/share/cl-repository/systems/"))
      (:tree (:home ".local/share/cl-systems/"))
+     ,@(ci-image-registry-entries)
      :inherit-configuration))
   (let ((sys (asdf:find-system "autoload" nil)))
     (when (or (null sys) (autoload-from-quicklisp-p sys))
@@ -569,6 +580,7 @@ Consumers may QL-fallback until those imports land.~%"
        (:tree ,(namestring source-dir))
        (:tree (:home ".local/share/cl-repository/systems/"))
        (:tree (:home ".local/share/cl-systems/"))
+       ,@(ci-image-registry-entries)
        :inherit-configuration))
     (asdf:clear-system resolved)
     (let ((spec (cl-repository-packager/asdf-plugin:auto-package-spec resolved)))
