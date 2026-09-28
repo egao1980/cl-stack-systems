@@ -127,7 +127,16 @@ jobs:
       - name: Ensure packager
         run: |
           set -euo pipefail
+          # ci-base does not export CL_SOURCE_REGISTRY (GHA remaps HOME).
+          # Same load as canned ci/run.lisp: tree of CL_REPOSITORY_DEST.
+          REGISTER='(let ((dest (uiop:getenv "CL_REPOSITORY_DEST")))
+                      (when (and dest (plusp (length dest)))
+                        (asdf:initialize-source-registry
+                         (list :source-registry
+                               (list :tree (uiop:ensure-directory-pathname dest))
+                               :ignore-inherited-configuration))))'
           ros -e "(sb-ext:disable-debugger)" \
+              -e "$REGISTER" \
               -e '(asdf:load-system "cl-repository-client")' \
               -e '(cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-repository" :priority :prepend)' \
               -e '(cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems" :priority :append)' \
@@ -139,6 +148,7 @@ jobs:
           # contains unloadable mgl-pax.asd (dual-provide).
           if [ "${{ matrix.import }}" = "dref" ] || [ "${{ matrix.import }}" = "mgl-pax" ]; then
             ros -e "(sb-ext:disable-debugger)" \
+                -e "$REGISTER" \
                 -e '(asdf:load-system "cl-repository-client")' \
                 -e '(cl-repo:add-registry "https://ghcr.io" :namespace "egao1980/cl-systems" :priority :append)' \
                 -e '(cl-repo:ensure-systems "autoload" :default-source :oci)' \
