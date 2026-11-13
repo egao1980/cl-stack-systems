@@ -265,6 +265,37 @@
   "When set (imports/<name>/provides), replace discovered provides.
    Stops one git tree from dual-providing a sibling import (mgl-pax vs bootstrap).")
 
+(defvar *pack-root* nil
+  "When set (imports/<name>/root), the clone-relative directory packed into the
+   layer instead of the .asd's own directory. sly's slynk/slynk.asd loads
+   ../contrib/: packing only slynk/ dropped every contrib (slynk/mrepl).")
+
+(defun sibling-root-file (qlfile)
+  "Optional imports/<name>/root — one clone-relative directory (\".\" = clone root)."
+  (let ((path (merge-pathnames "root" (uiop:pathname-directory-pathname qlfile))))
+    (when (probe-file path)
+      (let ((line (string-trim '(#\Space #\Tab #\Newline #\Return)
+                               (uiop:read-file-string path))))
+        (when (plusp (length line))
+          line)))))
+
+(defun apply-pack-root (spec clone-dir)
+  "Pack *PACK-ROOT* under CLONE-DIR. The .asd must lie inside it: consumers find
+   it through their (:tree …) registry entry for the install directory."
+  (when *pack-root*
+    (let* ((root (uiop:ensure-directory-pathname
+                  (merge-pathnames (uiop:ensure-directory-pathname *pack-root*)
+                                   (uiop:ensure-directory-pathname clone-dir))))
+           (asd-dir (cl-repository-packager/build-matrix:package-spec-source-dir spec)))
+      (unless (uiop:directory-exists-p root)
+        (error "imports root ~a: no directory ~a" *pack-root* root))
+      (unless (or (uiop:pathname-equal (truename asd-dir) (truename root))
+                  (uiop:subpathp (truename asd-dir) (truename root)))
+        (error "imports root ~a does not contain the .asd directory ~a" root asd-dir))
+      (format t "~&; oci: packing ~a (root ~a) instead of ~a~%" root *pack-root* asd-dir)
+      (setf (cl-repository-packager/build-matrix:package-spec-source-dir spec) (truename root))))
+  spec)
+
 (defun ql-dummy-autoload-directories ()
   "Quicklisp mgl-pax dist ships autoload/ that is not AUTOLOAD:AUTOLOAD-SYSTEM."
   (let ((homes (remove-duplicates
@@ -594,6 +625,7 @@ Consumers may QL-fallback until those imports land.~%"
                                   &key system-name source-url pin version-file)
   (let* ((packed (maybe-stage-source source-dir system-name))
          (spec (build-spec-from-source packed system-name source-url revision)))
+    (apply-pack-root spec packed)
     (apply-oci-version spec :pin pin :env-version (env "PKG_VERSION")
                        :version-file version-file)
     (publish-built reg namespace skip-catalog publish-ql-deps deps-dist-url
@@ -643,7 +675,8 @@ Consumers may QL-fallback until those imports land.~%"
               (let* ((dir (uiop:pathname-directory-pathname qlfile))
                      (name (first (last (pathname-directory dir)))))
                 (when (stringp name) name))))
-         (*oci-provides* (sibling-provides-file qlfile)))
+         (*oci-provides* (sibling-provides-file qlfile))
+         (*pack-root* (sibling-root-file qlfile)))
     (when publish-ql-deps
       (ql:quickload :cl-repository-ql-exporter :silent t))
     (multiple-value-bind (reg registry-url)
