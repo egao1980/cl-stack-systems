@@ -40,6 +40,11 @@ github alexandria/alexandria v1.4
 
 Or hand-write `imports/<name>/qlfile`. Prefer pinned tags/SHAs.
 
+Optional sibling files: `system` (ASDF system to publish), `version` (OCI tag when
+the .asd has no `:version`), `provides` (one system per line), `root` (clone-relative
+directory to pack instead of the .asd's own, e.g. `.` for `slynk`, whose
+`slynk/slynk.asd` loads `../contrib/`).
+
 ### When to use this vs a fork / native repo
 
 | Situation | Action |
