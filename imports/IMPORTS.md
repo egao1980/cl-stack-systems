@@ -36,6 +36,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | parse-declarations-1.0 | git gitlab.common-lisp.net/parse-declarations → OCI `1.0` (`system` file) | serapeum |
 | bobbin | github sjl/bobbin `v1.0.1` | clingon, adopt |
 | clingon | github dnaeon/clingon `v0.7.0` | cli-backend-clingon |
+| clunit2 | git codeberg.org/cage/clunit2 `9bbacba` → OCI `0.7.0` | grpc/tests (egao1980/grpc) |
 | cl-reexport | github takagi/cl-reexport `03ad7a0` | clingon |
 | babel | github cl-babel/babel | quri |
 | blackbird | github orthecreedence/blackbird `1ec17c5` | http-protocol, ws-protocol |
