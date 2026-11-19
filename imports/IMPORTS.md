@@ -96,7 +96,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | sha1 | github massung/SHA1 `be8b1b1` → OCI `1.0` | websocket-driver-base |
 | websocket-driver / websocket-driver-base / websocket-driver-client / websocket-driver-server | github egao1980/websocket-driver `e98b4ec` → OCI **0.2.2** (fukamachi + #74; 0.2.1 dropped a paren on `close-connection`) | [`ws-backend-websocket-driver`](https://github.com/egao1980/ws-backend-websocket-driver) + cl-stack-demos |
 | prove / prove-asdf | github fukamachi/prove `5d71f02` → OCI **1.0.0** | quri-test (`prove-asdf` is a defsystem-depends-on) |
-| http2 | github egao1980/http2 `827bfc7` → OCI **2.1.1** (patched zellerin; threaded TLS is cl+ssl, no openssl grovel) | H2 client (`http2/client`) + Lisp accept (`http2/server/threaded`). CI `:with` is the **package** `http2` — not `http2/client`. |
+| http2 | github egao1980/http2 `38b1653` → OCI **2.1.7** (patched zellerin; threaded TLS is cl+ssl, no openssl grovel) | H2 client (`http2/client`) + Lisp accept (`http2/server/threaded`). CI `:with` is the **package** `http2` — not `http2/client`. |
 | anaphora | github spwhitton/anaphora `0.9.8` → OCI **0.9.8** | http2/core |
 | puri | github sharplispers/puri `4bbab89` → OCI **1.5.7** (asd has no `:version`) | http2/client + http2/server/shared |
 | gzip-stream | github mcna/gzip-stream `80b9a5e` → OCI **0.2.8** | http2 payload gzip (salza2 already imported) |
