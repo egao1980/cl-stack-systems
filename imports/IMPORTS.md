@@ -90,6 +90,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-garbage | github trivial-garbage/trivial-garbage `v0.21` → OCI `0.21` | bordeaux-threads |
 | trivial-gray-streams | github trivial-gray-streams/trivial-gray-streams | salza2, yason |
 | trivial-indent | git codeberg.org/shinmera/trivial-indent `5905ac0` → OCI `1.0.0` | documentation-utils |
+| trivial-timeout | github hraban/trivial-timeout `e70d9b4` (gwkkwg/trivial-timeout redirects there) → OCI `0.1.5` | trivial-channels (ag-ui-backend-tui) |
 | yason | github phmarek/yason `0c84b29` → OCI `0.8.3` | json-backend-yason alternate |
 | event-emitter | github fukamachi/event-emitter `d8bd3d9` → OCI `0.0.1` | websocket-driver-base |
 | fast-websocket | github fukamachi/fast-websocket `66ea866` → OCI `0.1` | websocket-driver |
