@@ -137,6 +137,21 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | trivial-with-current-source-form | github scymtym/trivial-with-current-source-form `d00f7ab` | esrap |
 | uuid | github dardoria/uuid `f0052f3` → OCI `2012.12.26` | mito-core |
 | trivial-utf-8 | git gitlab.common-lisp.net/trivial-utf-8 `3cd943e` (pre-mgl-pax) → **OCI `0.1.0` published** | uuid; pin avoids mgl-pax-bootstrap |
+| fiveam | github lispci/fiveam `v1.4.3` → OCI `1.4.3` (BSD-3-Clause) | test framework for E2 eval corpus (cl-str, jzon, serapeum, CST, …) (#72) |
+| net.didierverna.asdf-flv | github didierverna/asdf-flv `version-2.2` → OCI `2.2` (GNU All-Permissive) | fiveam |
+| parachute | github Shinmera/parachute `9a6679e` (archived GitHub mirror; codeberg has later commits) → OCI `1.5.0` (zlib) | test framework for E2 eval corpus (uax-15, lisp-chat) (#72) |
+| form-fiddle | github Shinmera/form-fiddle `706c4fa` (archived GitHub mirror) → OCI `1.1.0` (zlib) | parachute |
+| trivial-custom-debugger | github phoe/trivial-custom-debugger `802473c` → OCI `1.0.0` (BSD-2-Clause LICENSE; asd says MIT) | parachute |
+| 1am | github lmj/1am `8b1da94` → OCI `0.1.0` (asd has no `:version`; MIT) | lparallel tests, E2 eval corpus (#72) |
+| hu.dwim.stefil | github hu-dwim/hu.dwim.stefil `256474e` → OCI `0.1.0` (asd has no `:version`; BSD / public domain) | babel, local-time (older) tests, E2 eval corpus (#72) |
+| concrete-syntax-tree | github s-expressionists/Concrete-Syntax-Tree `f79dab6` → OCI `0.4.0` (BSD-2-Clause) | coalton, E2 eval corpus (#72) |
+| trivial-glob | github fukamachi/trivial-glob `0c2675d` → OCI `0.1.0` (MIT) | fukamachi/mallet, E2 eval corpus (#72) |
+| circular-streams | github fukamachi/circular-streams `e770bad` → OCI `0.1` (LLGPL) | dexador tests, E2 eval corpus (#72) |
+| http-body | github fukamachi/http-body `6c84ce8` → OCI `0.1` (BSD-2-Clause) | dexador tests, E2 eval corpus (#72) |
+| cl-ansi-text | github pnathan/cl-ansi-text `v2.0.1` → OCI `2.0.1` (LLGPL) | prove runtime dep, E2 eval corpus (#72) |
+| cl-colors2 | git codeberg.org/cage/cl-colors2 `v0.7.1` (`2ac5898`) → OCI `0.7.0` (Boost-1.0) | cl-ansi-text 2.x |
+| cl-colors | github tpapp/cl-colors `8274105` (archived) → OCI `0.2` (Boost-1.0) | cl-ansi-text 1.x (older prove checkouts) (#72) |
+| let-plus | github sharplispers/let-plus `455e657` → OCI `0.2` (Boost-1.0) | cl-colors |
 
 ## Intentionally not here
 
