@@ -69,6 +69,7 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | documentation-utils | git codeberg.org/shinmera/documentation-utils `cd5b506` → OCI `1.2.0` | float-features |
 | array-utils | git codeberg.org/shinmera/array-utils `16e108a` → OCI `1.3.0` | plump |
 | plump | git codeberg.org/shinmera/plump `45fb7ff` → OCI `2.0.0` | html-protocol |
+| lass | git codeberg.org/shinmera/LASS `d28499f` → OCI `0.6.0` (zlib; pinned before the 2026-05 binary-build commits that put `#-no-dependencies` in `:depends-on`) | [`css-backend-lass`](https://github.com/egao1980/css-backend-lass) (cl-stack CSS, H4h-0b-1) |
 | float-features | git codeberg.org/shinmera/float-features `136a908` → OCI `1.1.0` | jzon (non-ECL) |
 | cl-base64 | github darabi/cl-base64 | cl-mime |
 | local-time | github dlowe-net/local-time `59d93f7` | cl-cookie |
