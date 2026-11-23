@@ -6,7 +6,8 @@
 ;;; One row per import: (system smoke-form). SMOKE runs after
 ;;; (asdf:load-system SYSTEM) in the child image; T means "loads" is the check.
 ;;;   alexandria  control: an import that works today
-;;;   jose        #75: cl-json and assoc-utils are missing, so sync fails
+;;;   jose        #75: cl-json and assoc-utils were missing, so sync failed
+;;;   cl-json, assoc-utils  #75: the two imports jose needs
 ;;;   the rest    #76: libraries python-to-cl recommends, not in cl-systems
 
 (defun cl-repo-available-p ()
@@ -49,30 +50,33 @@
 
 (deftest-parametrize import-installs-and-loads
     ((system smoke)
-     :ids ("alexandria" "jose"
+     :ids ("alexandria" "jose" "cl-json" "assoc-utils"
            "lparallel" "cl-csv" "3bmd" "cl-redis" "opticl" "function-cache" "cl-smtp"
            "cl-pdf" "cl-typesetting" "cl-excel" "legit" "machine-state" "lquery" "clss"
            "check-it" "parcom" "cl-progress-bar")
      ("alexandria" "(assert (equal (alexandria:flatten '(1 (2))) '(1 2)))")
      ;; #75, from the jose README: HS256 round trip.
      ("jose" "(let* ((key (ironclad:ascii-string-to-byte-array \"my$ecret\")) (token (jose:encode :hs256 key '((\"hello\" . \"world\"))))) (assert (equal (jose:decode :hs256 key token) '((\"hello\" . \"world\")))))")
+     ;; #75: jose's two missing dependencies on their own.
+     ("cl-json" "(assert (string= (cl-json:encode-json-to-string '((:a . 1))) \"{\\\"a\\\":1}\"))")
+     ("assoc-utils" "(assert (equal 1 (assoc-utils:aget '((\"a\" . 1)) \"a\")))")
      ;; #76, first tier.
      ("lparallel" "(let ((lparallel:*kernel* (lparallel:make-kernel 2))) (unwind-protect (assert (equal (lparallel:pmap 'list #'1+ '(1 2 3)) '(2 3 4))) (lparallel:end-kernel :wait t)))")
      ("cl-csv" "(assert (equal (cl-csv:read-csv (format nil \"a,b~%1,2~%\")) '((\"a\" \"b\") (\"1\" \"2\"))))")
      ("3bmd" "(assert (search \"<h1>\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream \"# hi\" s))))")
      ("cl-redis" "t")
-     ("opticl" "t")
-     ("function-cache" "t")
+     ("opticl" "(let ((img (opticl:make-8-bit-gray-image 2 2 :initial-element 7))) (assert (= 7 (aref img 1 1))))")
+     ("function-cache" "(progn (function-cache:defcached cached-square (x) (* x x)) (assert (= 9 (cached-square 3))) (assert (= 9 (cached-square 3))))")
      ("cl-smtp" "t")
      ("cl-pdf" "t")
      ("cl-typesetting" "t")
      ("cl-excel" "t")
      ("legit" "t")
-     ("machine-state" "t")
-     ("lquery" "t")
-     ("clss" "t")
-     ("check-it" "t")
-     ("parcom" "t")
+     ("machine-state" "(assert (plusp (machine-state:machine-cores)))")
+     ("lquery" "(assert (equal '(\"hi\") (coerce (lquery:$ (initialize (plump:parse \"<p class=a>hi</p>\")) \"p.a\" (text)) 'list)))")
+     ("clss" "(assert (= 1 (length (clss:select \"p\" (plump:parse \"<p>x</p>\")))))")
+     ("check-it" "(assert (integerp (check-it:generate (check-it:generator (integer)))))")
+     ("parcom" "(assert (equal \"a\" (parcom:parse (parcom:char #\\a) \"a\")))")
      ("cl-progress-bar" "t"))
   (if (not (cl-repo-available-p))
       (skip "cl-repo is not on PATH")
