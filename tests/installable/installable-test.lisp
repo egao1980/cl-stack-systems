@@ -53,7 +53,7 @@
      :ids ("alexandria" "jose" "cl-json" "assoc-utils"
            "lparallel" "cl-csv" "3bmd" "cl-redis" "opticl" "function-cache" "cl-smtp"
            "cl-pdf" "cl-typesetting" "cl-excel" "legit" "machine-state" "lquery" "clss"
-           "check-it" "parcom" "cl-progress-bar")
+           "check-it" "parcom" "cl-progress-bar" "3bmd-ext-code-blocks")
      ("alexandria" "(assert (equal (alexandria:flatten '(1 (2))) '(1 2)))")
      ;; #75, from the jose README: HS256 round trip.
      ("jose" "(let* ((key (ironclad:ascii-string-to-byte-array \"my$ecret\")) (token (jose:encode :hs256 key '((\"hello\" . \"world\"))))) (assert (equal (jose:decode :hs256 key token) '((\"hello\" . \"world\")))))")
@@ -77,7 +77,8 @@
      ("clss" "(assert (= 1 (length (clss:select \"p\" (plump:parse \"<p>x</p>\")))))")
      ("check-it" "(assert (integerp (check-it:generate (check-it:generator (integer)))))")
      ("parcom" "(assert (equal \"a\" (parcom:parse (parcom:char #\\a) \"a\")))")
-     ("cl-progress-bar" "t"))
+     ("cl-progress-bar" "t")
+     ("3bmd-ext-code-blocks" "(let ((3bmd-code-blocks:*code-blocks* t)) (assert (search \"<pre\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"```lisp~%(+ 1 2)~%```~%\") s)))))"))
   (if (not (cl-repo-available-p))
       (skip "cl-repo is not on PATH")
       (multiple-value-bind (ok-p code tail) (check-import system smoke)
