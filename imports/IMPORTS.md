@@ -210,6 +210,8 @@ Unmodified upstream at the pinned SHA. Checked by `tests/installable` (`cd tests
 | swap-bytes | github sionescu/swap-bytes `43ab141` (MIT) | pngload |
 | zpb-exif | github xach/zpb-exif `ee8a467` (BSD) | pngload |
 | nibbles | github sharplispers/nibbles `98bc0b7` (BSD-3-Clause) | 3bz |
+| colorize | github kingcons/colorize `c41fcc5` (MIT, per its .asd) | 3bmd-ext-code-blocks, 3bmd-ext-definition-lists: python-to-cl's "fenced code with colorize" (#76) |
+| html-encode | github fosskers/html-encode `31cf6fe` → OCI `1.2` (asd has no `:version`; MIT) | colorize. Quicklisp ships it as the orphan tarball `html-encode-1.2.tgz`; this git mirror has the same `.asd`, `.lisp` and `LICENSE` byte for byte (plus a README) |
 
 ## Intentionally not here
 

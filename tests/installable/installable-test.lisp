@@ -53,7 +53,9 @@
      :ids ("alexandria" "jose" "cl-json" "assoc-utils"
            "lparallel" "cl-csv" "3bmd" "cl-redis" "opticl" "function-cache" "cl-smtp"
            "cl-pdf" "cl-typesetting" "cl-excel" "legit" "machine-state" "lquery" "clss"
-           "check-it" "parcom" "cl-progress-bar" "3bmd-ext-code-blocks")
+           "check-it" "parcom" "cl-progress-bar" "3bmd-ext-code-blocks"
+           "colorize" "html-encode" "3bmd-ext-code-blocks/colorized"
+           "3bmd-ext-definition-lists" "3bmd-ext-tables" "3bmd-ext-wiki-links")
      ("alexandria" "(assert (equal (alexandria:flatten '(1 (2))) '(1 2)))")
      ;; #75, from the jose README: HS256 round trip.
      ("jose" "(let* ((key (ironclad:ascii-string-to-byte-array \"my$ecret\")) (token (jose:encode :hs256 key '((\"hello\" . \"world\"))))) (assert (equal (jose:decode :hs256 key token) '((\"hello\" . \"world\")))))")
@@ -72,13 +74,25 @@
      ("cl-typesetting" "t")
      ("cl-excel" "t")
      ("legit" "t")
-     ("machine-state" "(assert (plusp (machine-state:machine-cores)))")
-     ("lquery" "(assert (equal '(\"hi\") (coerce (lquery:$ (initialize (plump:parse \"<p class=a>hi</p>\")) \"p.a\" (text)) 'list)))")
+     ;; Its package is ORG.SHIRAKUMO.MACHINE-STATE (no nickname).
+     ("machine-state" "(assert (plusp (org.shirakumo.machine-state:machine-cores)))")
+     ;; (initialize X) parses X itself: give it the HTML text.
+     ("lquery" "(assert (equal '(\"hi\") (coerce (lquery:$ (initialize \"<p class=a>hi</p>\") \"p.a\" (text)) 'list)))")
      ("clss" "(assert (= 1 (length (clss:select \"p\" (plump:parse \"<p>x</p>\")))))")
      ("check-it" "(assert (integerp (check-it:generate (check-it:generator (integer)))))")
-     ("parcom" "(assert (equal \"a\" (parcom:parse (parcom:char #\\a) \"a\")))")
+     ;; A char parser yields the character, not a string.
+     ("parcom" "(assert (eql #\\a (parcom:parse (parcom:char #\\a) \"a\")))")
      ("cl-progress-bar" "t")
-     ("3bmd-ext-code-blocks" "(let ((3bmd-code-blocks:*code-blocks* t)) (assert (search \"<pre\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"```lisp~%(+ 1 2)~%```~%\") s)))))"))
+     ("3bmd-ext-code-blocks" "(let ((3bmd-code-blocks:*code-blocks* t)) (assert (search \"<pre\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"```lisp~%(+ 1 2)~%```~%\") s)))))")
+     ;; Round 2: 3bmd's fenced code and definition lists need colorize, and
+     ;; colorize needs html-encode (a Quicklisp orphan tarball;
+     ;; fosskers/html-encode is a byte-identical git mirror).
+     ("colorize" "(assert (search \"<span\" (colorize:html-colorization :common-lisp \"(defun f (x) x)\")))")
+     ("html-encode" "(assert (string= \"a&lt;b\" (html-encode:encode-for-pre \"a<b\")))")
+     ("3bmd-ext-code-blocks" "(let ((3bmd-code-blocks:*code-blocks* t)) (assert (search \"<span class=\\\"paren1\\\">\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"```lisp~%(+ 1 2)~%```~%\") s)))))")
+     ("3bmd-ext-definition-lists" "(let ((3bmd-definition-lists:*definition-lists* t)) (assert (search \"<dd>\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"term~%:  def~%\") s)))))")
+     ("3bmd-ext-tables" "(let ((3bmd-tables:*tables* t)) (assert (search \"<table\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"| a | b |~%|---|---|~%| 1 | 2 |~%\") s)))))")
+     ("3bmd-ext-wiki-links" "(let ((3bmd-wiki:*wiki-links* t)) (assert (search \"Page\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream \"see [[Page]]\" s)))))"))
   (if (not (cl-repo-available-p))
       (skip "cl-repo is not on PATH")
       (multiple-value-bind (ok-p code tail) (check-import system smoke)
