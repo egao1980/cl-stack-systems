@@ -55,7 +55,8 @@
            "cl-pdf" "cl-typesetting" "cl-excel" "legit" "machine-state" "lquery" "clss"
            "check-it" "parcom" "cl-progress-bar" "3bmd-ext-code-blocks"
            "colorize" "html-encode" "3bmd-ext-code-blocks/colorized"
-           "3bmd-ext-definition-lists" "3bmd-ext-tables" "3bmd-ext-wiki-links")
+           "3bmd-ext-definition-lists" "3bmd-ext-tables" "3bmd-ext-wiki-links"
+           "cl-pdf/write-document" "cl-typesetting/write-document")
      ("alexandria" "(assert (equal (alexandria:flatten '(1 (2))) '(1 2)))")
      ;; #75, from the jose README: HS256 round trip.
      ("jose" "(let* ((key (ironclad:ascii-string-to-byte-array \"my$ecret\")) (token (jose:encode :hs256 key '((\"hello\" . \"world\"))))) (assert (equal (jose:decode :hs256 key token) '((\"hello\" . \"world\")))))")
@@ -92,7 +93,16 @@
      ("3bmd-ext-code-blocks" "(let ((3bmd-code-blocks:*code-blocks* t)) (assert (search \"<span class=\\\"paren1\\\">\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"```lisp~%(+ 1 2)~%```~%\") s)))))")
      ("3bmd-ext-definition-lists" "(let ((3bmd-definition-lists:*definition-lists* t)) (assert (search \"<dd>\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"term~%:  def~%\") s)))))")
      ("3bmd-ext-tables" "(let ((3bmd-tables:*tables* t)) (assert (search \"<table\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream (format nil \"| a | b |~%|---|---|~%| 1 | 2 |~%\") s)))))")
-     ("3bmd-ext-wiki-links" "(let ((3bmd-wiki:*wiki-links* t)) (assert (search \"Page\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream \"see [[Page]]\" s)))))"))
+     ("3bmd-ext-wiki-links" "(let ((3bmd-wiki:*wiki-links* t)) (assert (search \"Page\" (with-output-to-string (s) (3bmd:parse-string-and-print-to-stream \"see [[Page]]\" s)))))")
+     ;; Prosecution round 2: "t" only shows that cl-pdf loads. At the pinned
+     ;; mbattyani/cl-pdf 0a1cd33 (upstream master), WRITE-OBJECT on a PDF name
+     ;; calls PDF::EXTENDED-ASCII-P, which only cl-pdf-parser defines
+     ;; (upstream cl-pdf #40, #41, #42, #47), so no document can be written:
+     ;; "The function PDF::EXTENDED-ASCII-P is undefined." This is the
+     ;; python-to-cl pdf.org example (ReportLab's canvas), writing to a temp file.
+     ("cl-pdf" "(let ((f (merge-pathnames \"installable-cl-pdf.pdf\" (uiop:temporary-directory)))) (pdf:with-document () (pdf:with-page () (pdf:in-text-mode (pdf:set-font (pdf:get-font \"Helvetica\") 24.0) (pdf:move-text 72 770) (pdf:draw-text \"Quarterly report\"))) (pdf:write-document f)) (assert (string= \"%PDF\" (with-open-file (s f) (let ((b (make-string 4))) (read-sequence b s) b)))))")
+     ;; cl-typesetting (ReportLab's Platypus role) writes through cl-pdf.
+     ("cl-typesetting" "(let ((f (merge-pathnames \"installable-tt.pdf\" (uiop:temporary-directory)))) (tt:with-document () (let ((content (tt:compile-text () (tt:paragraph (:font \"Helvetica\" :font-size 12) \"Hello from cl-typesetting.\" :eol)))) (tt:draw-pages content) (when pdf:*page* (tt:finalize-page pdf:*page*)) (tt:write-document f))) (assert (string= \"%PDF\" (with-open-file (s f) (let ((b (make-string 4))) (read-sequence b s) b)))))"))
   (if (not (cl-repo-available-p))
       (skip "cl-repo is not on PATH")
       (multiple-value-bind (ok-p code tail) (check-import system smoke)
