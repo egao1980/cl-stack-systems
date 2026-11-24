@@ -56,7 +56,8 @@
            "check-it" "parcom" "cl-progress-bar" "3bmd-ext-code-blocks"
            "colorize" "html-encode" "3bmd-ext-code-blocks/colorized"
            "3bmd-ext-definition-lists" "3bmd-ext-tables" "3bmd-ext-wiki-links"
-           "cl-pdf/write-document" "cl-typesetting/write-document")
+           "cl-pdf/write-document" "cl-typesetting/write-document"
+           "cl-pdf/extended-ascii-name" "cl-pdf-parser/read-back")
      ("alexandria" "(assert (equal (alexandria:flatten '(1 (2))) '(1 2)))")
      ;; #75, from the jose README: HS256 round trip.
      ("jose" "(let* ((key (ironclad:ascii-string-to-byte-array \"my$ecret\")) (token (jose:encode :hs256 key '((\"hello\" . \"world\"))))) (assert (equal (jose:decode :hs256 key token) '((\"hello\" . \"world\")))))")
@@ -102,7 +103,9 @@
      ;; python-to-cl pdf.org example (ReportLab's canvas), writing to a temp file.
      ("cl-pdf" "(let ((f (merge-pathnames \"installable-cl-pdf.pdf\" (uiop:temporary-directory)))) (pdf:with-document () (pdf:with-page () (pdf:in-text-mode (pdf:set-font (pdf:get-font \"Helvetica\") 24.0) (pdf:move-text 72 770) (pdf:draw-text \"Quarterly report\"))) (pdf:write-document f)) (assert (string= \"%PDF\" (with-open-file (s f) (let ((b (make-string 4))) (read-sequence b s) b)))))")
      ;; cl-typesetting (ReportLab's Platypus role) writes through cl-pdf.
-     ("cl-typesetting" "(let ((f (merge-pathnames \"installable-tt.pdf\" (uiop:temporary-directory)))) (tt:with-document () (let ((content (tt:compile-text () (tt:paragraph (:font \"Helvetica\" :font-size 12) \"Hello from cl-typesetting.\" :eol)))) (tt:draw-pages content) (when pdf:*page* (tt:finalize-page pdf:*page*)) (tt:write-document f))) (assert (string= \"%PDF\" (with-open-file (s f) (let ((b (make-string 4))) (read-sequence b s) b)))))"))
+     ("cl-typesetting" "(let ((f (merge-pathnames \"installable-tt.pdf\" (uiop:temporary-directory)))) (tt:with-document () (let ((content (tt:compile-text () (tt:paragraph (:font \"Helvetica\" :font-size 12) \"Hello from cl-typesetting.\" :eol)))) (tt:draw-pages content) (when pdf:*page* (tt:finalize-page pdf:*page*)) (tt:write-document f))) (assert (string= \"%PDF\" (with-open-file (s f) (let ((b (make-string 4))) (read-sequence b s) b)))))")
+     ("cl-pdf" "(assert (string= \"/Caf#E9\" (with-output-to-string (pdf::*pdf-stream*) (pdf::write-object (format nil \"/Caf~c\" (code-char 233))))))")
+     ("cl-pdf-parser" "(let ((f (merge-pathnames \"installable-parser.pdf\" (uiop:temporary-directory)))) (pdf:with-document () (dotimes (i 2) (pdf:with-page () (pdf:in-text-mode (pdf:set-font (pdf:get-font \"Helvetica\") 12.0) (pdf:move-text 72 770) (pdf:draw-text (format nil \"page ~d\" i))))) (pdf:write-document f)) (assert (= 2 (length (pdf::pages (pdf::root-page (pdf::read-pdf-file f)))))))"))
   (if (not (cl-repo-available-p))
       (skip "cl-repo is not on PATH")
       (multiple-value-bind (ok-p code tail) (check-import system smoke)

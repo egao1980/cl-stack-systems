@@ -168,7 +168,7 @@ Unmodified upstream at the pinned SHA. Checked by `tests/installable` (`cd tests
 | opticl | github slyrus/opticl `f6fc4dc` → OCI `0.1.0` (asd has no `:version`; BSD) | python-to-cl: Pillow (#76) |
 | function-cache | github AccelerationNet/function-cache `f20e3cd` (BSD) | python-to-cl: cachetools (#76) |
 | cl-smtp | git gitlab.common-lisp.net/cl-smtp/cl-smtp `47139ee` (LLGPL) | python-to-cl: smtplib (#76) |
-| cl-pdf | github mbattyani/cl-pdf `0a1cd33` (BSD-style) | python-to-cl: ReportLab (#76) |
+| cl-pdf | github egao1980/cl-pdf `d8d9f77` (fork of mbattyani/cl-pdf `0a1cd33` + EXTENDED-ASCII-P defined in pdf.lisp, egao1980/cl-pdf#1; upstream #40/#42/#47; BSD-style). Also provides cl-pdf-parser | python-to-cl: ReportLab, pypdf (#76) |
 | cl-typesetting | github mbattyani/cl-typesetting `86eba98` (BSD-style) | python-to-cl: ReportLab (#76) |
 | cl-excel | github gwangjinkim/cl-excel `f4136ab` (MIT) | python-to-cl: openpyxl (#76) |
 | legit | git codeberg.org/shinmera/legit `877147a` (zlib) | python-to-cl: GitPython (#76) |
