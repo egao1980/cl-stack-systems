@@ -105,7 +105,7 @@
      ;; cl-typesetting (ReportLab's Platypus role) writes through cl-pdf.
      ("cl-typesetting" "(let ((f (merge-pathnames \"installable-tt.pdf\" (uiop:temporary-directory)))) (tt:with-document () (let ((content (tt:compile-text () (tt:paragraph (:font \"Helvetica\" :font-size 12) \"Hello from cl-typesetting.\" :eol)))) (tt:draw-pages content) (when pdf:*page* (tt:finalize-page pdf:*page*)) (tt:write-document f))) (assert (string= \"%PDF\" (with-open-file (s f) (let ((b (make-string 4))) (read-sequence b s) b)))))")
      ("cl-pdf" "(assert (string= \"/Caf#E9\" (with-output-to-string (pdf::*pdf-stream*) (pdf::write-object (format nil \"/Caf~c\" (code-char 233))))))")
-     ("cl-pdf-parser" "(let ((f (merge-pathnames \"installable-parser.pdf\" (uiop:temporary-directory)))) (pdf:with-document () (dotimes (i 2) (pdf:with-page () (pdf:in-text-mode (pdf:set-font (pdf:get-font \"Helvetica\") 12.0) (pdf:move-text 72 770) (pdf:draw-text (format nil \"page ~d\" i))))) (pdf:write-document f)) (assert (= 2 (length (pdf::pages (pdf::root-page (pdf::read-pdf-file f)))))))"))
+     ("cl-pdf-parser" "(dolist (n '(1 2)) (let ((f (merge-pathnames (format nil \"installable-parser-~d.pdf\" n) (uiop:temporary-directory)))) (pdf:with-document () (dotimes (i n) (pdf:with-page () (pdf:in-text-mode (pdf:set-font (pdf:get-font \"Helvetica\") 12.0) (pdf:move-text 72 770) (pdf:draw-text (format nil \"page ~d\" i))))) (pdf:write-document f)) (assert (= n (length (pdf::pages (pdf::root-page (pdf::read-pdf-file f))))))))"))
   (if (not (cl-repo-available-p))
       (skip "cl-repo is not on PATH")
       (multiple-value-bind (ok-p code tail) (check-import system smoke)
