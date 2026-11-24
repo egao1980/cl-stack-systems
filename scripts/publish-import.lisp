@@ -614,8 +614,17 @@ Consumers may QL-fallback until those imports land.~%"
        ,@(ci-image-registry-entries)
        :inherit-configuration))
     (asdf:clear-system resolved)
-    (let ((spec (cl-repository-packager/asdf-plugin:auto-package-spec resolved)))
+    (let ((spec (cl-repository-packager/asdf-plugin:auto-package-spec resolved))
+          (primary (asdf:primary-system-name resolved)))
       (rewrite-same-tarball-depends spec source-dir resolved)
+      ;; imports/<name>/system may name a secondary (frugal-uuid/non-frugal)
+      ;; so the package carries that system's depends-on. Build it under the
+      ;; primary name: BUILD-PACKAGE writes the spec name into the config and
+      ;; the layer prefix, and the client installs into systems/<config name>/,
+      ;; which refuses a name with a slash (cl-stack-systems#76, cl-smtp row).
+      (unless (string= primary resolved)
+        (format t "~&; oci: secondary ~a packaged as its primary ~a~%" resolved primary)
+        (setf (cl-repository-packager/build-matrix:package-spec-name spec) primary))
       (setf (cl-repository-packager/build-matrix:package-spec-source-url spec) source-url)
       (setf (cl-repository-packager/build-matrix:package-spec-revision spec) revision)
       spec)))
