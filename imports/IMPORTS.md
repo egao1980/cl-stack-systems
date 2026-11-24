@@ -153,6 +153,66 @@ gh workflow run publish.yml -R egao1980/cl-stack-systems -f import=<name>
 | cl-colors | github tpapp/cl-colors `8274105` (archived) → OCI `0.2` (Boost-1.0) | cl-ansi-text 1.x (older prove checkouts) (#72) |
 | let-plus | github sharplispers/let-plus `455e657` → OCI `0.2` (Boost-1.0) | cl-colors |
 
+### python-to-cl recommendations (#75, #76)
+
+Unmodified upstream at the pinned SHA. Checked by `tests/installable` (`cd tests/installable && cl-repo test`) once published.
+
+| Import | Source | Why |
+|--------|--------|-----|
+| cl-json | github sharplispers/cl-json `994dd38` (MIT) | jose (#75) |
+| assoc-utils | github fukamachi/assoc-utils `b14ab68` (Public Domain) | jose (#75) |
+| lparallel | github sharplispers/lparallel `0cb11aa` (BSD) | python-to-cl: concurrent.futures, joblib (#76) |
+| cl-csv | github AccelerationNet/cl-csv `e257121` (BSD) | python-to-cl: csv (#76) |
+| 3bmd | github 3b/3bmd `bc7ae59` → OCI `0.1.0` (asd has no `:version`; MIT) | python-to-cl: Markdown (#76) |
+| cl-redis | github vseloved/cl-redis `06ff30e` (MIT) | python-to-cl: redis-py (#76) |
+| opticl | github slyrus/opticl `f6fc4dc` → OCI `0.1.0` (asd has no `:version`; BSD) | python-to-cl: Pillow (#76) |
+| function-cache | github AccelerationNet/function-cache `f20e3cd` (BSD) | python-to-cl: cachetools (#76) |
+| cl-smtp | git gitlab.common-lisp.net/cl-smtp/cl-smtp `47139ee` (LLGPL) | python-to-cl: smtplib (#76) |
+| cl-pdf | github egao1980/cl-pdf `d8d9f77` (fork of mbattyani/cl-pdf `0a1cd33` + EXTENDED-ASCII-P defined in pdf.lisp, egao1980/cl-pdf#1; upstream #40/#42/#47; BSD-style). Also provides cl-pdf-parser | python-to-cl: ReportLab, pypdf (#76) |
+| cl-typesetting | github mbattyani/cl-typesetting `86eba98` (BSD-style) | python-to-cl: ReportLab (#76) |
+| cl-excel | github gwangjinkim/cl-excel `f4136ab` (MIT) | python-to-cl: openpyxl (#76) |
+| legit | git codeberg.org/shinmera/legit `877147a` (zlib) | python-to-cl: GitPython (#76) |
+| machine-state | git codeberg.org/shinmera/machine-state `baeddd2` (zlib) | python-to-cl: psutil (#76) |
+| lquery | git codeberg.org/shinmera/lquery `08c9cb6` (zlib) | python-to-cl: Beautiful Soup (#76) |
+| clss | git codeberg.org/shinmera/clss `cd5f603` (zlib) | python-to-cl: Beautiful Soup; lquery (#76) |
+| check-it | github DalekBaldwin/check-it `b79c910` (LLGPL) | python-to-cl: Hypothesis (#76) |
+| parcom | github fosskers/parcom `739b5ab` (MPL-2.0) | python-to-cl: pyparsing (#76) |
+| cl-progress-bar | github sirherrbatka/cl-progress-bar `09067ec` → OCI `0.1.0` (asd has no `:version`; MIT) | python-to-cl: tqdm (#76) |
+| atomics | git codeberg.org/shinmera/atomics `1caed1a` (zlib) | lparallel |
+| cl-interpol | github edicl/cl-interpol `d4f49d4` (BSD-2-Clause) | cl-csv, function-cache |
+| rutils | github vseloved/rutils `79cb029` (MIT) | cl-redis |
+| retrospectiff | github slyrus/retrospectiff `2fbf8c6` (BSD) | opticl |
+| pngload | github lisp-mirror/pngload `307e5f8` → OCI `0.1.0` (asd has no `:version`; MIT) | opticl (upstream git.mfiano.net is gone; lisp-mirror keeps it unmodified) |
+| opticl-core | github slyrus/opticl-core `b7cd13d` → OCI `0.1.0` (asd has no `:version`; BSD) | opticl, retrospectiff |
+| cl-tga | github fisxoj/cl-tga `4dc2f7b` → OCI `0.1.0` (asd has no `:version`; MIT) | opticl |
+| symbol-munger | github AccelerationNet/symbol-munger `e96558e` (MIT) | function-cache |
+| frugal-uuid | github ak-coram/cl-frugal-uuid `b25fcdd` → OCI `0.1.0` (asd has no `:version`; MIT) | cl-smtp (needs frugal-uuid/non-frugal: `system` file, so the package carries its deps) |
+| zpb-ttf | github xach/zpb-ttf `1d520cc` (BSD) | cl-pdf |
+| cxml | github sharplispers/cxml `2d8fa42` → OCI `0.1.0` (asd has no `:version`; LLGPL) | cl-excel |
+| cxml-stp | github sharplispers/cxml-stp `4fe6c71` → OCI `0.1.0` (asd has no `:version`; X11-style) | cl-excel |
+| xpath | github sharplispers/xpath `d364da6` (BSD-2-Clause) | cxml-stp |
+| closure-common | github sharplispers/closure-common `e3c5f5f` → OCI `0.1.0` (asd has no `:version`; LLGPL) | cxml |
+| yacc | github jech/cl-yacc `d02b6ea` → OCI `0.4` (asd has no `:version`; MIT/X11) | xpath |
+| simple-inferiors | git codeberg.org/shinmera/simple-inferiors `ff97237` (zlib) | legit |
+| lambda-fiddle | git codeberg.org/shinmera/lambda-fiddle `064189b` (zlib) | legit |
+| cocoas | git codeberg.org/shinmera/cocoas `d35ee43` (zlib) | machine-state (darwin) |
+| com-on | git codeberg.org/shinmera/com-on `0a91675` (zlib) | machine-state (windows) |
+| trivial-main-thread | git codeberg.org/shinmera/trivial-main-thread `f237084` (zlib) | cocoas |
+| optima | github m2ym/optima `373b245` (LLGPL) | check-it |
+| documentation-utils-extensions | github sirherrbatka/documentation-utils-extensions `517a642` (MIT) | cl-progress-bar |
+| trivial-clock | github ak-coram/cl-trivial-clock `9cc9469` → OCI `0.1.0` (asd has no `:version`; MIT) | frugal-uuid |
+| com.gigamonkeys.binary-data | github gigamonkey/monkeylib-binary-data `22e9089` → OCI `0.1.0` (asd has no `:version`; BSD-3-Clause) | retrospectiff |
+| ieee-floats | github marijnh/ieee-floats `9566ce8` → OCI `0.1.0` (asd has no `:version`; BSD) | retrospectiff |
+| deflate | github pmai/Deflate `3c6d7a7` (MIT) | retrospectiff |
+| 3bz | github 3b/3bz `64d108e` → OCI `0.1.0` (asd has no `:version`; MIT) | pngload |
+| mmap | git codeberg.org/shinmera/mmap `d8d4fad` (zlib) | 3bz, pngload |
+| parse-float | github soemraws/parse-float `622e582` → OCI `0.1.0` (asd has no `:version`; Public Domain) | pngload |
+| swap-bytes | github sionescu/swap-bytes `43ab141` (MIT) | pngload |
+| zpb-exif | github xach/zpb-exif `ee8a467` (BSD) | pngload |
+| nibbles | github sharplispers/nibbles `98bc0b7` (BSD-3-Clause) | 3bz |
+| colorize | github kingcons/colorize `c41fcc5` (MIT, per its .asd) | 3bmd-ext-code-blocks, 3bmd-ext-definition-lists: python-to-cl's "fenced code with colorize" (#76) |
+| html-encode | github fosskers/html-encode `31cf6fe` → OCI `1.2` (asd has no `:version`; MIT) | colorize. Quicklisp ships it as the orphan tarball `html-encode-1.2.tgz`; this git mirror has the same `.asd`, `.lisp` and `LICENSE` byte for byte (plus a README) |
+
 ## Intentionally not here
 
 | System | Reason |
